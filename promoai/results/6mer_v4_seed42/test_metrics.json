@@ -1,0 +1,23 @@
+{
+  "accuracy": 0.713012958963283,
+  "precision": 0.6810463515374025,
+  "recall": 0.8012958963282938,
+  "f1": 0.7362937236417763,
+  "roc_auc": 0.7877039707233789,
+  "pr_auc_ap": 0.7672747572014175,
+  "tn": 1157,
+  "fp": 695,
+  "fn": 368,
+  "tp": 1484,
+  "test_size": 3704,
+  "positive_count": 1852,
+  "negative_count": 1852,
+  "threshold": 0.5,
+  "checkpoint_path": "<PROJECT_ROOT>/finetune/dss3_6mer_1000bp_head_only_v4_gc_seed42/best_model",
+  "seed": 42,
+  "model_name": "Plant DNAGPT-6mer",
+  "sequence_length_bp": 1000,
+  "kmer": 6,
+  "actual_token_length": 997,
+  "model_max_length": 1024
+}

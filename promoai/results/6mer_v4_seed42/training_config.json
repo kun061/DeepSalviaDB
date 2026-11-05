@@ -1,0 +1,14 @@
+{
+  "model_name": "<PROJECT_ROOT>/Pretrained_Models/plant-dnagpt-6mer",
+  "seed": 42,
+  "sequence_length_bp": 1000,
+  "kmer": 6,
+  "model_max_length": 1024,
+  "learning_rate": 0.001,
+  "epochs": 5.0,
+  "batch": 4,
+  "gradient_accumulation": 4,
+  "trainable_count": 1536,
+  "total_count": 88998144,
+  "training_seconds": 3858.59667801857
+}

@@ -1,0 +1,32 @@
+{
+  "model": "One-hot DNA + 1D-CNN",
+  "architecture": "Conv1d(4,64,k=15,p=7)-ReLU-MaxPool(4)-Conv1d(64,128,k=9,p=4)-ReLU-GlobalMaxPool-Dropout-Linear(128,2)",
+  "input_shape": [
+    4,
+    1000
+  ],
+  "epochs_max": 20,
+  "batch_size": 128,
+  "patience": 4,
+  "optimizer": "AdamW",
+  "learning_rate": 0.001,
+  "weight_decay": 0.0001,
+  "loss": "CrossEntropyLoss",
+  "dropout": 0.3,
+  "decision_threshold": 0.5,
+  "best_epoch": 5,
+  "best_dev_f1": 0.7377355287727041,
+  "selection_metric": "dev_f1",
+  "device": "cuda",
+  "seed": 42,
+  "data_dir": "<PROJECT_ROOT>/DSS3/promoter_1kb/chromosome_holdout_v4_gc_matched",
+  "project_root": "<PROJECT_ROOT>",
+  "python": "3.12.4 | packaged by Anaconda, Inc. | (main, Jun 18 2024, 15:12:24) [GCC 11.2.0]",
+  "platform": "Linux-6.8.0-48-generic-x86_64-with-glibc2.35",
+  "numpy": "1.26.4",
+  "pandas": "3.0.6",
+  "scikit_learn": "1.5.0",
+  "torch": "2.5.1+cu124",
+  "cuda_available": true,
+  "created_utc": "2026-10-24T09:23:05.497542+00:00"
+}

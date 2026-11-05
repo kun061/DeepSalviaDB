@@ -1,0 +1,85 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*credentials*
+*secret*
+
+# Python/runtime
+__pycache__/
+*.py[cod]
+*.orig
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+*.log
+*.pid
+venv/
+.venv/
+env/
+outputs/
+runs/
+tmp/
+.lock/
+
+# IDE/OS
+.DS_Store
+.vscode/
+.idea/
+
+# Model weights and binary artifacts
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.joblib
+*.pkl
+*.gguf
+*.bin
+*.index
+
+# DeepPPI private/large assets
+deepppi/data/
+deepppi/weights/*
+!deepppi/weights/README.md
+deepppi/results/
+deepppi/runs/
+deepppi/verification/
+
+# ProMoAI private/large assets
+promoai/DSS3/
+promoai/finetune/
+promoai/Pretrained_Models/
+
+# SalviaChat private/large assets
+salviachat/data/*
+!salviachat/data/README.md
+salviachat/dss_final_annotation.csv
+salviachat/omics_ml_predictions_database.json
+salviachat/._____temp/
+salviachat/ngrok
+salviachat/ngrok-*.tgz
+salviachat/benchmark/results/
+salviachat/analysis/cv_results/
+
+# Database/index artifacts
+*.sqlite
+*.sqlite3
+*.db
+*.fasta
+*.fa
+*.faa
+*.fna
+*.nhr
+*.nin
+*.nsq
+*.phr
+*.pin
+*.psq
+*.hmm

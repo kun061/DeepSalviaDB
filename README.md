@@ -1,0 +1,84 @@
+# DeepSalviaDB AI Services
+
+本仓库提供四个面向丹参/鼠尾草研究的 AI 推理服务：
+
+| 服务 | 功能 | REST API |
+|---|---|---|
+| SalviaChat | 多智能体数据库问答与可视化 | `POST /rag/chat` |
+| ProMoAI | 1 kb DNA 启动子预测与顺式元件标注 | `POST /pred/predict` |
+| Metabolome Service | 转录组-代谢组候选基因预测 | `POST /metabolome/predict_multi_gene` |
+| DeepPPI | 蛋白质相互作用概率预测 | `POST /ppi/predict_ppi` |
+
+FastAPI 网关还提供蛋白结构预测和引物设计接口。交互式接口文档位于 `/docs`。
+
+## 仓库内容
+
+```text
+DeepSalviaDB/
+├── deepppi/             # DeepPPI 推理、训练与复现代码
+├── promoai/             # ProMoAI 模型与实验说明
+├── salviachat/          # 统一 FastAPI 网关及 SalviaChat 源码
+├── docs/
+│   ├── api.md
+│   ├── model_assets.md
+│   ├── release_checklist.md
+│   └── repository_structure.md
+├── scripts/              # 发布前自动检查
+├── .env.example
+├── .gitignore
+├── THIRD_PARTY_NOTICES.md
+└── requirements.txt
+```
+
+四项 AI 工具对应三个顶层产品目录：Metabolome Service 是统一网关中的 `salviachat/routers/metabolome.py`，不再建立容易与网关重复的第四套应用目录。
+
+本仓库不包含模型权重、原始组学数据、MySQL 数据库、BLAST/Pfam 数据库、向量数据库或真实密钥。资源清单和放置方式见 [model_assets.md](docs/model_assets.md)。
+完整目录与逐文件用途见 [repository_structure.md](docs/repository_structure.md)。
+当前发布完成度与仍需人工确认的项目见 [release_checklist.md](docs/release_checklist.md)。
+
+## 快速启动
+
+建议使用项目已有的 `salviachat` Conda 环境：
+
+```bash
+cp .env.example .env
+# 编辑 .env，填写数据库和模型路径
+pip install -r requirements.txt
+```
+
+先启动独立 DeepPPI worker：
+
+```bash
+cd deepppi
+uvicorn app:app --host 127.0.0.1 --port 8001 --workers 1
+```
+
+再启动统一网关：
+
+```bash
+cd salviachat
+uvicorn app:app --host 0.0.0.0 --port 6006 --workers 1
+```
+
+检查服务：
+
+```bash
+curl http://127.0.0.1:8001/health
+curl http://127.0.0.1:6006/health
+```
+
+生产部署建议只让 Uvicorn 监听内网地址，通过 Nginx/FRP 暴露固定 HTTPS 域名；不要公开 MySQL、Ollama、DeepPPI worker 或原始模型端口。
+
+## 发布前检查
+
+1. 不要提交 `.env`、数据库密码、API Key、服务器 IP 或用户数据。
+2. 模型权重建议发布到 Hugging Face、Zenodo 或 GitHub Release，并在文档中记录 SHA256。
+3. 大文件如确需 Git 管理，应使用 Git LFS；普通 GitHub 单文件不能超过 100 MB。
+4. 公开数据前确认数据来源、患者/样本隐私及再分发许可。
+5. 正式公开前补充合适的 `LICENSE`，并核对 Plant DNA LLMs、预训练模型和各数据源的许可证。
+6. ProMoAI 的上游来源和非商业 ShareAlike 要求见 `THIRD_PARTY_NOTICES.md`。
+7. 建议先运行 `python scripts/check_release.py` 做发布检查。
+
+## 引用
+
+请在此处补充论文标题、作者、期刊/预印本 DOI，以及 DeepPPI、ProMoAI 上游模型和数据集引用信息。

@@ -1,0 +1,37 @@
+{
+  "model": "6-mer + Random Forest",
+  "n_estimators": 300,
+  "max_depth": 20,
+  "min_samples_leaf": 1,
+  "candidate_parameters": [
+    {
+      "max_depth": null,
+      "min_samples_leaf": 1,
+      "dev_f1": 0.7276368491321762
+    },
+    {
+      "max_depth": 20,
+      "min_samples_leaf": 1,
+      "dev_f1": 0.7344218593802065
+    },
+    {
+      "max_depth": null,
+      "min_samples_leaf": 2,
+      "dev_f1": 0.7319206189034645
+    }
+  ],
+  "decision_threshold": 0.5,
+  "feature": "normalized overlapping 6-mer frequencies, 4096 dimensions, A,C,G,T lexicographic order, CSR",
+  "selection_metric": "dev_f1",
+  "seed": 42,
+  "data_dir": "<PROJECT_ROOT>/DSS3/promoter_1kb/chromosome_holdout_v4_gc_matched",
+  "project_root": "<PROJECT_ROOT>",
+  "python": "3.12.4 | packaged by Anaconda, Inc. | (main, Jun 18 2024, 15:12:24) [GCC 11.2.0]",
+  "platform": "Linux-6.8.0-48-generic-x86_64-with-glibc2.35",
+  "numpy": "1.26.4",
+  "pandas": "3.0.6",
+  "scikit_learn": "1.5.0",
+  "torch": "2.5.1+cu124",
+  "cuda_available": true,
+  "created_utc": "2026-10-24T09:21:08.390097+00:00"
+}

@@ -1,0 +1,35 @@
+{
+  "model_path": "<PROJECT_ROOT>/Pretrained_Models/plant-dnagpt-BPE",
+  "data_dir": "<PROJECT_ROOT>/DSS3/promoter_1kb/chromosome_holdout_v4_gc_matched",
+  "expected_model_max_length": 512,
+  "tokenizer_model_max_length": 512,
+  "tokenizer_vocab_size": 8002,
+  "pad_token_id": 8001,
+  "model_type": "gpt2",
+  "max_position_embeddings": 1024,
+  "train": {
+    "count": 37516,
+    "min_tokens": 144,
+    "max_tokens": 204,
+    "mean_tokens": 181.1140846572129,
+    "over_512": 0,
+    "over_position_capacity": 0
+  },
+  "dev": {
+    "count": 5448,
+    "min_tokens": 139,
+    "max_tokens": 200,
+    "mean_tokens": 181.14996328928046,
+    "over_512": 0,
+    "over_position_capacity": 0
+  },
+  "test": {
+    "count": 3704,
+    "min_tokens": 154,
+    "max_tokens": 204,
+    "mean_tokens": 181.59260259179266,
+    "over_512": 0,
+    "over_position_capacity": 0
+  },
+  "safe_without_truncation": true
+}

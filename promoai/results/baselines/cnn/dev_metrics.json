@@ -1,0 +1,20 @@
+{
+  "accuracy": 0.7164096916299559,
+  "precision": 0.6861383012314494,
+  "recall": 0.7977239353891337,
+  "f1": 0.7377355287727041,
+  "roc_auc": 0.7975915935147629,
+  "pr_auc_ap": 0.7881978961534106,
+  "tp": 2173,
+  "tn": 1730,
+  "fp": 994,
+  "fn": 551,
+  "sample_count": 5448,
+  "positive_count": 2724,
+  "negative_count": 2724,
+  "threshold": 0.5,
+  "seed": 42,
+  "config": {},
+  "split": "dev",
+  "best_epoch": 5
+}

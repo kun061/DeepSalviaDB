@@ -1,0 +1,22 @@
+{
+  "accuracy": 0.7074155653450808,
+  "precision": 0.6723611958511287,
+  "recall": 0.8091042584434655,
+  "f1": 0.7344218593802065,
+  "roc_auc": 0.7768817073880727,
+  "pr_auc_ap": 0.7478417797368655,
+  "tp": 2204,
+  "tn": 1650,
+  "fp": 1074,
+  "fn": 520,
+  "sample_count": 5448,
+  "positive_count": 2724,
+  "negative_count": 2724,
+  "threshold": 0.5,
+  "seed": 42,
+  "config": {
+    "max_depth": 20,
+    "min_samples_leaf": 1
+  },
+  "split": "dev"
+}

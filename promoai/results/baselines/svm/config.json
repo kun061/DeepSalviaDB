@@ -1,0 +1,37 @@
+{
+  "model": "6-mer + Linear SVM",
+  "C": 10.0,
+  "candidate_C": [
+    0.1,
+    1.0,
+    10.0
+  ],
+  "feature": "normalized overlapping 6-mer frequencies, 4096 dimensions, A,C,G,T lexicographic order, CSR",
+  "decision_threshold": 0.0,
+  "selection_metric": "dev_f1",
+  "selection_trials": [
+    {
+      "C": 0.1,
+      "dev_f1": 0.6296906461651107
+    },
+    {
+      "C": 1.0,
+      "dev_f1": 0.6672694394213382
+    },
+    {
+      "C": 10.0,
+      "dev_f1": 0.7061745919091554
+    }
+  ],
+  "seed": 42,
+  "data_dir": "<PROJECT_ROOT>/DSS3/promoter_1kb/chromosome_holdout_v4_gc_matched",
+  "project_root": "<PROJECT_ROOT>",
+  "python": "3.12.4 | packaged by Anaconda, Inc. | (main, Jun 18 2024, 15:12:24) [GCC 11.2.0]",
+  "platform": "Linux-6.8.0-48-generic-x86_64-with-glibc2.35",
+  "numpy": "1.26.4",
+  "pandas": "3.0.6",
+  "scikit_learn": "1.5.0",
+  "torch": "2.5.1+cu124",
+  "cuda_available": true,
+  "created_utc": "2026-10-24T09:14:38.804677+00:00"
+}

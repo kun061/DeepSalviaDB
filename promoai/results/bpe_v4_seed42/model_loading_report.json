@@ -1,0 +1,10 @@
+{
+  "missing_keys": [
+    "score.weight"
+  ],
+  "unexpected_keys": [],
+  "mismatched_keys": [],
+  "allowed_new_head": [
+    "score.weight"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "model_name": "<PROJECT_ROOT>/Pretrained_Models/plant-dnagpt-BPE",
+  "seed": 42,
+  "sequence_length_bp": 1000,
+  "tokenization": "raw DNA BPE",
+  "model_max_length": 512,
+  "epochs": 5,
+  "batch_size": 4,
+  "gradient_accumulation": 4,
+  "learning_rate": 0.001,
+  "optimizer": "AdamW",
+  "weight_decay": 0.01,
+  "scheduler": null,
+  "trainable_parameters": [
+    "score.weight"
+  ],
+  "trainable_count": 1536,
+  "total_count": 91989504,
+  "training_seconds": 710.9533128738403
+}
