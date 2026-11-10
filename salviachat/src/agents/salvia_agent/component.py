@@ -279,9 +279,8 @@ def _normalize_generated_sql(query: str, question: str) -> str:
 
 class SalviaComponent:
     def __init__(self):
-        # 使用 Coder 模型，因为它写 SQL 更准确
         self.llm = ChatOllama(
-            model=os.getenv("SALVIACHAT_SQL_MODEL", os.getenv("SALVIACHAT_MODEL", "qwen2.5-coder:7b")),
+            model=os.getenv("SALVIACHAT_SQL_MODEL", os.getenv("SALVIACHAT_MODEL", "xxx")),
             base_url=os.getenv("SALVIACHAT_OLLAMA_BASE_URL", "http://localhost:11434"),
             temperature=float(os.getenv("SALVIACHAT_TEMPERATURE", "0")),
             num_ctx=int(os.getenv("SALVIACHAT_NUM_CTX", "16000")),
@@ -293,9 +292,8 @@ class SalviaComponent:
         #     model="deepseek-chat", # 
         #     api_key="YOUR_API_KEY",
         #     base_url="https://api.deepseek.com",
-        #     temperature=0.3    # 稍微给一点温度，让润色更自然
+        #     temperature=0.3    
         # )
-        # 数据库配置 (请修改为你的真实配置)
         self.db_config = {
             "host": os.getenv("SALVIACHAT_DB_HOST", "127.0.0.1"),
             "port": int(os.getenv("SALVIACHAT_DB_PORT", "3306")),
@@ -885,9 +883,7 @@ Return only valid JSON. Every statement must be a read-only SELECT.
         try:
             response = self.llm.invoke([SystemMessage(content=system_prompt)])
             
-            # 解析 JSON
             content = response.content.replace("```json", "").replace("```", "").strip()
-            # 简单的清洗，防止模型输出额外的文本
             json_match = re.search(r'({.*?})', content, re.DOTALL)
             if json_match:
                 params = json.loads(json_match.group(1))
@@ -939,7 +935,6 @@ Return only valid JSON. Every statement must be a read-only SELECT.
             return {"status": "error", "error": "No SQL found to execute"}
 
         try:
-            # 连接数据库
             sql_queries = sql_query if isinstance(sql_query, list) else [sql_query]
             sql_text = "\n".join(sql_queries)
             conn = mysql.connector.connect(**self.db_config)
@@ -988,27 +983,18 @@ Return only valid JSON. Every statement must be a read-only SELECT.
                         row["query_index"] = query_index
                         results.append(row)
 
-            # ================= [新增：基因组序列自动缝合逻辑] =================
             current_sql = sql_text.lower()
             
-            # 1. 检测是否在查基因组序列表
             if "chromosome_sequence_chunk" in current_sql and results:
                 try:
-                    # 尝试从用户问题中提取请求的 Start 和 End
-                    # (这里用简单的正则提取数字，或者你也可以让 Coder 在 SQL 注释里传回来)
-                    # 简单起见，我们假设从结果的第一块和最后一块能推断大概范围，
-                    # 或者更严谨的做法是：让 Coder 在 SQL 里把 UserStart/UserEnd 作为一个伪列 SELECT 出来 (比如 SELECT 5000 as req_start...)
-                    # 这里演示最通用的“全拼接”：
-                    
+
                     full_sequence = ""
-                    # 按顺序拼接所有块
+
                     sorted_results = sorted(results, key=lambda x: x['chunk_start'])
                     for chunk in sorted_results:
                         if chunk.get('sequence_chunk'):
                             full_sequence += chunk['sequence_chunk']
                     
-                    # 构造一个新的、干净的返回对象
-                    # 我们不返回几百个 chunk 对象，而是返回一个汇总对象
                     summary_result = [{
                         "species": sorted_results[0].get('species_name'),
                         "chromosome": sorted_results[0].get('chromosome'),
@@ -1017,15 +1003,12 @@ Return only valid JSON. Every statement must be a read-only SELECT.
                         "full_sequence_raw": full_sequence # 这个字段留给 Generator 决定是否展示
                     }]
                     
-                    # 替换原始结果
                     results = summary_result
                     logger.info(f"Stitched {len(sorted_results)} sequence chunks into one string.")
                     
                 except Exception as e:
                     logger.error(f"Error stitching sequences: {e}")
-            # ================= [新增：强制注入表型单位] =================
             if "root_phenotype_data" in sql_text.lower() and results:
-                # 定义单位字典
                 unit_mapping = {
                     "total_root_length": "total_root_length (cm )",
                     "total_root_surface_area": "total_root_surface_area (cm²)",
@@ -1041,7 +1024,6 @@ Return only valid JSON. Every statement must be a read-only SELECT.
                 for row in results:
                     new_row = {}
                     for k, v in row.items():
-                        # 如果在映射表里，就换成带单位的键名，否则保持原样
                         new_key = unit_mapping.get(k, k)
                         new_row[new_key] = v
                     formatted_results.append(new_row)
@@ -1049,9 +1031,9 @@ Return only valid JSON. Every statement must be a read-only SELECT.
                 # 覆盖原来的 results
                 results = formatted_results
                 logger.info("Injected phenotype units into results.")
-            # ================= [新增：代谢组单位/美化注入] =================
+
             if "salvia_metabolite_info" in sql_text.lower() and results:
-                # 代谢组通常是相对含量，我们可以给列名加个备注，方便 Generator 绘图
+
                 metabolite_unit_map = {
                     "dag30": "30 DAG (Abundance)",
                     "dag60": "60 DAG (Abundance)",
@@ -1068,9 +1050,6 @@ Return only valid JSON. Every statement must be a read-only SELECT.
                         new_row[new_key] = v
                     formatted_metabolites.append(new_row)
                 results = formatted_metabolites
-            # ================= [新增功能：Python 端预过滤] =================
-            # 获取用户问题中的关键词（简单提取，比如 leaf, root, stem）
-            # 注意：这里只是一个简单的辅助过滤，防止 Prompt 过载
             user_question_text = ""
             for msg in messages:
                 if isinstance(msg, HumanMessage):
@@ -1084,13 +1063,11 @@ Return only valid JSON. Every statement must be a read-only SELECT.
                 for row in results:
                     new_row = {}
                     for k, v in row.items():
-                        # 识别类似于 dag30_1, dag60_2 这样的列
                         import re
                         match = re.match(r'dag(\d+)_(\d+)', k.lower())
                         if match:
                             day = match.group(1)
                             rep = match.group(2)
-                            # 改成人类和前端画图易读的格式，比如 "30 DAG (Rep 1)"
                             new_key = f"{day} DAG hormone abundance (Rep {rep}; unit unavailable)"
                             new_row[new_key] = v
                         else:
@@ -1099,8 +1076,6 @@ Return only valid JSON. Every statement must be a read-only SELECT.
                 results = formatted_hormones
                 logger.info("Injected hormone profiling headers into results.")
             
-            # Filter only wide dynamic-expression rows. Preserve compact
-            # rows from other omics queries in the same cross-omics request.
             if results and target_keywords and any(len(row) > 10 for row in results):
                 filtered_results = []
                 for row in results:
@@ -1127,22 +1102,14 @@ Return only valid JSON. Every statement must be a read-only SELECT.
                     for k, v in row.items():
                         if isinstance(v, decimal.Decimal):
                             row[k] = float(v)
-            # 格式化结果为字符串
-            # ==================================================
-            # 格式化结果为字符串与防爆 Token 拦截机制
-            # ==================================================
             
-            # 🛡️ 绿色通道：如果是基因密度查询（包含海量坐标），不要把坐标喂给大模型！
             is_gene_density = "gene density" in user_question_text or "distribution" in user_question_text
             if is_gene_density and "start_bp" in sql_text.lower() and len(results) > 100:
-                # 给大模型看一个“伪装”的总结文本，防止它看到残缺数据产生幻觉
                 result_str = f"Successfully retrieved {len(results)} gene coordinates for visualization. [DATA HIDDEN TO SAVE TOKENS]. PLEASE REPLY TO USER: 'I have generated the gene density heatmap for the top chromosomes as requested.'"
                 logger.info(f"Triggered bypass for massive coordinate data. Hidden {len(results)} rows from LLM context.")
             else:
-                # 常规数据转换
                 result_str = json.dumps(results, ensure_ascii=False, indent=2)
                 
-                # 截断过长的结果防止爆 Token
                 if len(result_str) > 12000:
                     result_str = result_str[:12000] + "... [truncated]"
 
