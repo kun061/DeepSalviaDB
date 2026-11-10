@@ -11,9 +11,8 @@ logger.setLevel(logging.ERROR)
 
 class Router:
     def __init__(self):
-        # 本地模型调用
         self.llm = ChatOllama(
-            model=os.getenv("SALVIACHAT_ROUTER_MODEL", os.getenv("SALVIACHAT_MODEL", "qwen2.5-coder:7b")),
+            model=os.getenv("SALVIACHAT_ROUTER_MODEL", os.getenv("SALVIACHAT_MODEL", "xxx")),
             base_url=os.getenv("SALVIACHAT_OLLAMA_BASE_URL", "http://localhost:11434"),
             #api_key="ollama",
             num_ctx=int(os.getenv("SALVIACHAT_NUM_CTX", "16000")),
@@ -22,22 +21,12 @@ class Router:
             keep_alive=os.getenv("SALVIACHAT_KEEP_ALIVE", "24h"),
             format="json",
         )
-        # self.llm = ChatOpenAI(
-        #     model="deepseek-chat", # (DeepSeek V3)
-        #     api_key="YOUR_API_KEY", 
-        #     base_url="https://api.deepseek.com",
-        #     temperature=0,      
-        #     max_tokens=2000
-        # )
     def route(self, state):
-        # Keep metadata
         metadata = state.get("metadata", {})
         messages = state["messages"]
         
-        # Get user question
         user_question = [msg for msg in messages if isinstance(msg, HumanMessage)]
         
-        # Get history
         agent_history = [
             msg for msg in messages
             if isinstance(msg, AIMessage) and
@@ -54,9 +43,7 @@ class Router:
                 }
             }
         
-        # Extract user question text
         original_question = user_question[0].content
-        # 前置图谱消歧与重写
         rewritten_message = None
         try:
             linker = EntityLinker()
@@ -66,7 +53,6 @@ class Router:
             if link_result["status"] != "no_alias":
                 original_question = link_result["query"]
                 
-                # 构造提示消息，并使用明确的标签包裹，让下游正则无脑提取！
                 rewritten_message = SystemMessage(
                     content=f"[ENTITY_LINKER_SUCCESS]: The user's query contains a biological alias. It has been successfully resolved to the official database ID. Please strictly use this ID for your SQL query. \n\n<RESOLVED_ID>{original_question}</RESOLVED_ID>",
                     additional_kwargs={"type": "entity_linking_resolved"}
@@ -75,7 +61,6 @@ class Router:
         except Exception as e:
             logger.error(f"Entity linking tool failed: {e}")
             
-        # Fast deterministic routing avoids a full LLM call for clear requests.
         fast_mode = os.getenv("SALVIACHAT_FAST_MODE", "true").lower() in {"1", "true", "yes", "on"}
         if fast_mode:
             tool_pattern = re.compile(
@@ -180,7 +165,6 @@ Do not include any other text or formatting. ONLY return the JSON object.
                     if agent in ["salvia_agent", "tool_agent", "irrelevant_questions"]:
                         logger.info(f"Routing decision: {agent}, reason: {reason}")
                         
-                        # 构建返回的字典
                         return_dict = {
                             "next": agent,
                             "metadata": {
@@ -190,7 +174,6 @@ Do not include any other text or formatting. ONLY return the JSON object.
                             }
                         }
                         
-                        # 🚀 极其重要：如果存在重写消息，把它塞进 messages 列表里传下去！
                         if rewritten_message:
                             return_dict["messages"] = [rewritten_message]
                             
