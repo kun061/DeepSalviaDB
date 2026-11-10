@@ -3,7 +3,7 @@ import os
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-import httpx  # 使用 httpx 进行跨服务调用
+import httpx  
 
 router = APIRouter()
 
@@ -12,19 +12,16 @@ class PPIRequest(BaseModel):
     seq_b: str
     model_type: str = "ensemble"
     threshold: float = 0.5
-# 指向独立 DeepPPI worker 的地址
 WORKER_URL = os.getenv("DEEPPPI_WORKER_URL", "http://127.0.0.1:8001/predict_ppi")
 
 @router.post("/predict_ppi")
 async def predict_ppi(req: PPIRequest):
     try:
-        # 使用 httpx 异步将请求转发给 8001 端口的 DeepPPI worker
         async with httpx.AsyncClient() as client:
             payload = req.model_dump() if hasattr(req, "model_dump") else req.dict()
             response = await client.post(WORKER_URL, json=payload, timeout=120.0)
-            response.raise_for_status() # 检查 HTTP 错误
+            response.raise_for_status() 
             
-            # 获取 worker 算出来的结果
             result = response.json()
             
         return {
