@@ -1,18 +1,12 @@
-# 文件名: structure_service.py
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import requests
 
-# 1. 初始化当前模块的路由器
 router = APIRouter()
 
-# 2. 定义前端传来的数据模型
 class SequenceRequest(BaseModel):
     sequence: str
 
-# 3. 编写预测接口逻辑
-# 注意：这里的路径是 "/predict_structure"
-# 等会儿在 main.py 里挂载了 prefix 之后，完整路径就会变成 "/structure/predict_structure"
 @router.post("/predict_structure")
 async def predict_structure(req: SequenceRequest):
     sequence = req.sequence.strip()
