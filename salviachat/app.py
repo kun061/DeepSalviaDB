@@ -97,7 +97,7 @@ def health():
         "services": {
             "salviachat": getattr(app.state, "rag_status", "initializing"),
             "promoai": "ok" if model is not None else f"unavailable: {model_load_error}",
-            "metabolome": "ok",
+            "metabolome": "proxied via METABOLOME_WORKER_URL",
             "deepppi": "proxied via DEEPPPI_WORKER_URL",
         },
         "docs": "/docs",

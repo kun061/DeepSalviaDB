@@ -1,0 +1,38 @@
+{
+  "validation": "leave-one-stage-out cross-validation",
+  "stages": [
+    "DAG30",
+    "DAG60",
+    "DAG90",
+    "DAG240",
+    "DAG270",
+    "DAG390"
+  ],
+  "effective_joint_observations": 6,
+  "transcript_replicates_per_stage": 3,
+  "metabolite_replicates_per_stage": 6,
+  "sample_pairing": "not available; stage means used",
+  "models": [
+    "LASSO",
+    "ElasticNet",
+    "GradientBoosting",
+    "RandomForest"
+  ],
+  "top_n": 20,
+  "control_stage": "DAG30",
+  "target_stages": [
+    "DAG60",
+    "DAG90",
+    "DAG240",
+    "DAG270",
+    "DAG390"
+  ],
+  "deg_counts": {
+    "DAG60": 2490,
+    "DAG90": 5941,
+    "DAG240": 3323,
+    "DAG270": 3465,
+    "DAG390": 3682
+  },
+  "important_limitation": "DESeq2 filtering was fixed before LOSO-CV. This conditionally validates the ML step, not the complete DEG-screening-plus-ML discovery pipeline."
+}

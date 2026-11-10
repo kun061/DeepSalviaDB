@@ -7,7 +7,7 @@
 ## 已完成
 
 - [x] 四项服务源码和统一 FastAPI 网关已整理。
-- [x] 产品目录使用小写名称：`deepppi/`、`promoai/`、`salviachat/`。
+- [x] 产品目录使用小写名称：`deepppi/`、`promoai/`、`metabolome_service/`、`salviachat/`。
 - [x] Python 文件使用 `snake_case`，FastAPI 入口统一为 `app.py`。
 - [x] SalviaChat 接口按功能放入 `salviachat/routers/`。
 - [x] DeepPPI 训练代码集中在 `deepppi/training/`。
@@ -22,7 +22,7 @@
 - [ ] 在 `docs/model_assets.md` 填写模型/数据的正式下载地址、版本、许可证和 SHA256。
 - [ ] 在根目录 `README.md` 补充本项目论文、DeepPPI 数据集以及 Plant DNA LLMs 的完整引用。
 - [ ] 确认所有拟公开的小型实验结果和示例数据均允许再分发。
-- [ ] 用干净环境按 README 启动两个服务，并实际请求 `/health` 和核心预测接口。
+- [ ] 用干净环境按 README 启动三个服务，并实际请求 `/health` 和核心预测接口。
 - [ ] 搜索并确认仓库中不存在真实密码、Token、服务器地址、个人路径或受限样本信息。
 
 ## 建议完成

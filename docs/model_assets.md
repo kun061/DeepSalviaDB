@@ -29,17 +29,26 @@ deepppi/weights/D/
 
 ## Metabolome Service
 
-默认需要：
+独立 worker 默认需要：
 
 ```text
-salviachat/data/pred_gene/
+metabolome_service/data/pred_gene/
 ├── count_updated.txt
 ├── result_fpkm_updated.txt
 └── pathway_metabolites_intensity.csv
-salviachat/dss_final_annotation.csv
+metabolome_service/data/dss_final_annotation.csv
 ```
 
-如果数据不能再分发，应提供字段说明、最小匿名示例和数据申请流程。服务启动时缺少这些文件会将代谢组接口标记为不可用。
+也可以通过环境变量使用仓库外数据：
+
+```dotenv
+METABOLOME_DATA_DIR=/absolute/path/to/pred_gene
+METABOLOME_ANNOTATION_PATH=/absolute/path/to/dss_final_annotation.csv
+```
+
+该工具按请求运行 DESeq2 并拟合传统机器学习模型，当前没有固定预训练权重。可公开资源更适合发布为数据集或可复现分析资产，而不是伪装成神经网络检查点。
+
+如果数据不能再分发，应提供字段说明、合成小样例、SHA256 和数据申请流程。服务启动时缺少这些文件会在 `/health` 中报告 `data_ready=false`。
 
 ## SalviaChat
 

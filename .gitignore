@@ -57,6 +57,13 @@ promoai/DSS3/
 promoai/finetune/
 promoai/Pretrained_Models/
 
+# Metabolome Service private/derived assets
+metabolome_service/data/*
+!metabolome_service/data/README.md
+metabolome_service/results/local_cv/
+metabolome_service/artifacts/
+metabolome_service/*.joblib
+
 # SalviaChat private/large assets
 salviachat/data/*
 !salviachat/data/README.md

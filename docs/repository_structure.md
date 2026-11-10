@@ -2,7 +2,7 @@
 
 ## 命名规则
 
-- 产品目录统一使用小写名称：`deepppi`、`promoai`、`salviachat`。
+- 产品目录统一使用小写名称：`deepppi`、`promoai`、`metabolome_service`、`salviachat`。
 - Python 模块和普通文件使用 `snake_case`。
 - FastAPI 应用入口统一命名为 `app.py`，启动形式为 `uvicorn app:app`。
 - 功能路由放入 `routers/`，训练代码放入 `training/`，辅助程序放入 `scripts/`。
@@ -79,6 +79,21 @@
 | `threshold_metrics_dev.csv`、`threshold_metrics_test.csv` | 不同分类阈值下的指标。 |
 | `threshold_sensitivity_summary.json`、`threshold_sensitivity_report.md`、`audit.json` | 阈值实验汇总、可读报告和输入审计。 |
 
+## `metabolome_service/`
+
+| 路径 | 作用 |
+|---|---|
+| `README.md` | 模型性质、外部数据、启动、API、验证结果与限制。 |
+| `app.py` | 独立 FastAPI worker；按请求执行 DESeq2 和四类机器学习排序。 |
+| `requirements.txt` | 独立 worker 的最小依赖。 |
+| `data/README.md` | 四个外部组学/注释文件的字段与许可要求。 |
+| `analysis/cross_validate.py` | 留一时期交叉验证和候选基因稳定性分析。 |
+| `results/experiment_metadata.json` | 验证设计、样本配对限制与 DEG 数量。 |
+| `results/summary_by_model.csv` | 四种算法的汇总泛化指标。 |
+| `results/README.md` | 结果文件范围和解释限制。 |
+
+该服务没有固定预训练权重；树结构和回归系数在请求期间拟合。真实组学数据及大型派生结果不进入 Git。
+
 ## `salviachat/`
 
 | 路径 | 作用 |
@@ -87,7 +102,7 @@
 | `data/README.md` | 运行时数据目录说明；真实数据不进入 Git。 |
 | `routers/chat.py` | SalviaChat 多智能体问答、流式响应和绘图接口。 |
 | `routers/promoter.py` | ProMoAI 启动子预测和顺式元件标注接口。 |
-| `routers/metabolome.py` | 转录组—代谢组候选基因预测接口。 |
+| `routers/metabolome.py` | 将请求转发给内部 Metabolome worker。 |
 | `routers/deepppi.py` | 将统一网关请求转发给内部 DeepPPI worker。 |
 | `routers/structure.py` | 蛋白结构预测接口。 |
 | `routers/primer.py` | 引物设计接口。 |

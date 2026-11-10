@@ -24,7 +24,31 @@ Content-Type: application/json
 
 ## Metabolome Service
 
-具体请求字段以 `/docs` 中的 OpenAPI schema 为准。核心字段包括 `metabolite`、`stage`、`control_stage`、`model_types` 和 `top_n`。
+独立 worker 默认监听 `127.0.0.1:8002`：
+
+```http
+POST http://HOST:8002/predict_multi_gene
+Content-Type: application/json
+
+{
+  "metabolite": "代谢物名称",
+  "stage": "DAG60",
+  "control_stage": "DAG30",
+  "model_types": ["RandomForest", "LASSO"],
+  "top_n": 20
+}
+```
+
+统一网关保持原前端地址：
+
+```http
+POST /metabolome/predict_multi_gene
+```
+
+- Worker 健康检查：`GET http://HOST:8002/health`
+- Worker 元数据：`GET http://HOST:8002/metadata`
+- 网关代理健康检查：`GET /metabolome/health`
+- 该服务按请求拟合机器学习模型，没有固定预训练权重。
 
 ## DeepPPI
 
@@ -53,3 +77,4 @@ POST /ppi/predict_ppi
 - 网关：`GET /health`
 - ProMoAI：`GET /pred/health`
 - DeepPPI worker：`GET http://HOST:8001/health`
+- Metabolome worker：`GET http://HOST:8002/health`

@@ -17,6 +17,7 @@ FastAPI 网关还提供蛋白结构预测和引物设计接口。交互式接口
 DeepSalviaDB/
 ├── deepppi/             # DeepPPI 推理、训练与复现代码
 ├── promoai/             # ProMoAI 模型与实验说明
+├── metabolome_service/  # 独立多组学机器学习 worker 与验证代码
 ├── salviachat/          # 统一 FastAPI 网关及 SalviaChat 源码
 ├── docs/
 │   ├── api.md
@@ -30,7 +31,7 @@ DeepSalviaDB/
 └── requirements.txt
 ```
 
-四项 AI 工具对应三个顶层产品目录：Metabolome Service 是统一网关中的 `salviachat/routers/metabolome.py`，不再建立容易与网关重复的第四套应用目录。
+四项 AI 工具现在分别具有独立的产品目录；SalviaChat 通过内部 HTTP 将代谢组请求转发给 Metabolome worker。
 
 本仓库不包含模型权重、原始组学数据、MySQL 数据库、BLAST/Pfam 数据库、向量数据库或真实密钥。资源清单和放置方式见 [model_assets.md](docs/model_assets.md)。
 完整目录与逐文件用途见 [repository_structure.md](docs/repository_structure.md)。
@@ -53,6 +54,13 @@ cd deepppi
 uvicorn app:app --host 127.0.0.1 --port 8001 --workers 1
 ```
 
+再启动独立 Metabolome worker：
+
+```bash
+cd metabolome_service
+uvicorn app:app --host 127.0.0.1 --port 8002 --workers 1
+```
+
 再启动统一网关：
 
 ```bash
@@ -64,10 +72,11 @@ uvicorn app:app --host 0.0.0.0 --port 6006 --workers 1
 
 ```bash
 curl http://127.0.0.1:8001/health
+curl http://127.0.0.1:8002/health
 curl http://127.0.0.1:6006/health
 ```
 
-生产部署建议只让 Uvicorn 监听内网地址，通过 Nginx/FRP 暴露固定 HTTPS 域名；不要公开 MySQL、Ollama、DeepPPI worker 或原始模型端口。
+生产部署建议只让 Uvicorn 监听内网地址，通过 Nginx/FRP 暴露固定 HTTPS 域名；不要公开 MySQL、Ollama、DeepPPI worker、Metabolome worker 或原始模型端口。
 
 ## 发布前检查
 

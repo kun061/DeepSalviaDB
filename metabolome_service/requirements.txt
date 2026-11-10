@@ -1,0 +1,11 @@
+fastapi==0.140.0
+uvicorn[standard]==0.51.0
+python-dotenv==1.2.2
+pydantic==2.13.4
+pandas==2.3.3
+numpy==2.2.6
+scikit-learn==1.7.2
+pydeseq2==0.5.2
+scipy
+matplotlib==3.10.9
+venn==0.1.3
