@@ -1,5 +1,5 @@
 > GitHub 发布说明：本目录不随仓库分发模型权重、训练数据和历史结果；请先阅读根目录 docs/model_assets.md。
-# DeepPPI 一串红 D方案复现包
+# DeepPPI
 
 本目录提供 DeepPPI-D 的训练、评估和 REST 推理源码。冻结数据、三个种子的模型权重及历史结果属于外部资产，不进入普通 Git；下载和放置方式见根目录 `docs/model_assets.md`。
 
