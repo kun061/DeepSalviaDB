@@ -24,7 +24,6 @@ DeepSalviaDB/
 │   ├── model_assets.md
 │   ├── release_checklist.md
 │   └── repository_structure.md
-├── scripts/              # 发布前自动检查
 ├── .env.example
 ├── .gitignore
 ├── THIRD_PARTY_NOTICES.md
