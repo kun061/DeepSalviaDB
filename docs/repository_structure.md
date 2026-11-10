@@ -4,29 +4,27 @@
 
 | 路径 | 作用 |
 |---|---|
-| `README.md` | 项目总览、服务入口、启动方法和发布注意事项。 |
-| `.env.example` | 环境变量模板，只保留占位值，不包含真实密钥。 |
-| `.gitignore` | 排除权重、数据、数据库、日志、缓存和本地配置。 |
-| `requirements.txt` | 统一 API 网关和常用功能的 Python 依赖。 |
-| `THIRD_PARTY_NOTICES.md` | Plant DNA LLMs 等第三方代码、模型和许可证说明。 |
-| `scripts/check_release.py` | 检查敏感文件、超大文件及不应发布的模型/数据。 |
+| `README.md` | 项目总览、服务入口、启动方法和发布注意事项|
+| `.env.example` | 环境变量模板，只保留占位值，不包含真实密钥|
+| `.gitignore` | 排除权重、数据、数据库、日志、缓存和本地配置|
+| `requirements.txt` | 统一 API 网关和常用功能的 Python 依赖|
+| `THIRD_PARTY_NOTICES.md` | Plant DNA LLMs 等第三方代码、模型和许可证说明|
 
 ## `docs/`
 
 | 文件 | 作用 |
 |---|---|
-| `api.md` | REST API 路由、请求参数和响应形式。 |
-| `model_assets.md` | 仓库外模型、数据和数据库的放置位置及发布要求。 |
-| `release_checklist.md` | 区分已完成项目和正式公开前仍需人工确认的项目。 |
-| `repository_structure.md` | 本清单及统一命名规则。 |
+| `api.md` | REST API 路由、请求参数和响应形式|
+| `model_assets.md` | 仓库外模型、数据和数据库的放置位置及发布要求|
+| `repository_structure.md` | 本清单|
 
 ## `deepppi/`
 
 | 路径 | 作用 |
 |---|---|
-| `README.md` | DeepPPI-D 的模型方法、训练、评估和推理说明。 |
-| `app.py` | DeepPPI 独立 FastAPI worker，加载三个种子模型并提供 PPI 推理。 |
-| `data_scope.json` | 训练/验证/测试数据及外部资源范围清单。 |
+| `README.md` | DeepPPI-D 的模型方法、训练、评估和推理说明|
+| `app.py` | DeepPPI 独立 FastAPI worker，加载三个种子模型并提供 PPI 推理|
+| `data_scope.json` | 训练/验证/测试数据及外部资源范围清单|
 | `environment/environment.yml` | 原始 Conda 环境定义，供完整复现参考。 |
 | `environment/requirements.lock.txt` | 已冻结的 pip 包版本。 |
 | `scripts/run.sh` | DeepPPI 训练、评估等常用命令入口。 |
@@ -112,11 +110,3 @@
 | `src/agents/tool_agent/component.py` | 生物信息工具智能体的节点实现。 |
 | `src/agents/tool_agent/graph.py` | 生物信息工具智能体的 LangGraph 流程。 |
 | 各级 `__init__.py` | 将对应目录声明为可导入的 Python 包。 |
-
-## 不进入 GitHub 的内容
-
-- `.env`、API Key、数据库密码和真实服务器地址。
-- PyTorch、Safetensors、Joblib 等模型权重与检查点。
-- 原始 FASTA、CSV、数据库转储、向量库和 BLAST/Pfam 数据库。
-- 用户请求、聊天记录、临时上传、日志、PID、缓存和 `__pycache__`。
-- 可重新生成的逐样本预测和大型图表；只保留必要配置与汇总指标。
