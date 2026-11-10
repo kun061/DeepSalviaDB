@@ -34,7 +34,6 @@ DeepSalviaDB/
 
 本仓库不包含模型权重、原始组学数据、MySQL 数据库、BLAST/Pfam 数据库、向量数据库或真实密钥。资源清单和放置方式见 [model_assets.md](docs/model_assets.md)。
 完整目录与逐文件用途见 [repository_structure.md](docs/repository_structure.md)。
-当前发布完成度与仍需人工确认的项目见 [release_checklist.md](docs/release_checklist.md)。
 
 ## 快速启动
 
@@ -42,7 +41,7 @@ DeepSalviaDB/
 
 ```bash
 cp .env.example .env
-# 编辑 .env，填写数据库和模型路径
+# 编辑 .env，填写用户自己的数据库和模型路径
 pip install -r requirements.txt
 ```
 
@@ -77,15 +76,6 @@ curl http://127.0.0.1:6006/health
 
 生产部署建议只让 Uvicorn 监听内网地址，通过 Nginx/FRP 暴露固定 HTTPS 域名；不要公开 MySQL、Ollama、DeepPPI worker、Metabolome worker 或原始模型端口。
 
-## 发布前检查
-
-1. 不要提交 `.env`、数据库密码、API Key、服务器 IP 或用户数据。
-2. 模型权重建议发布到 Hugging Face、Zenodo 或 GitHub Release，并在文档中记录 SHA256。
-3. 大文件如确需 Git 管理，应使用 Git LFS；普通 GitHub 单文件不能超过 100 MB。
-4. 公开数据前确认数据来源、患者/样本隐私及再分发许可。
-5. 正式公开前补充合适的 `LICENSE`，并核对 Plant DNA LLMs、预训练模型和各数据源的许可证。
-6. ProMoAI 的上游来源和非商业 ShareAlike 要求见 `THIRD_PARTY_NOTICES.md`。
-7. 建议先运行 `python scripts/check_release.py` 做发布检查。
 
 ## 引用
 
