@@ -18,12 +18,12 @@ deepppi/weights/D/
 ├── seed_43/best.weights.h5
 └── seed_44/best.weights.h5
 ```
-
-训练/复现还需要 `deepppi/data/D/`。
+模型权重可以通过：https://huggingface.co/wangkun0601/deepppi-d进行下载
 
 ## ProMoAI
 
-
+BPE模型：https://huggingface.co/wangkun0601/promoai-dss3-bpe
+6-mer模型：https://huggingface.co/wangkun0601/promoai-dss3-6mer
 
 ## Metabolome Service
 
@@ -46,12 +46,3 @@ METABOLOME_DATA_DIR=/absolute/path/to/pred_gene
 ## SalviaChat
 
 核心问答依赖 MySQL 数据库和 Ollama 模型。数据库凭据通过 `.env` 配置
-
-
-## Released models
-
-| Model | Version | Download | License | SHA256 |
-|---|---|---|---|---|
-| DeepPPI-D | v1.0.0 | https://huggingface.co/wangkun0601/deepppi-d | |4da43123f027afb6f8a3927c0b5b08a7ed42110ed7de1aacd3f73d2f2f8a715c  seed_42 |
-| ProMoAI BPE | v1.0.0 | https://huggingface.co/wangkun0601/promoai-dss3-bpe | |80cfe1364ca1bd0ab0821055ed91cfe4ee2fe26bdf21888a2ca7ea8e381a9044 |
-| ProMoAI 6-mer | v1.0.0 | https://huggingface.co/wangkun0601/promoai-dss3-6mer | |1bb3bfe696235085ffdfc7aee6b0c33c8ab945517dde668e8966e32e3e5e405d |
