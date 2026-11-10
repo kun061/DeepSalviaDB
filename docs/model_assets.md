@@ -18,7 +18,7 @@ deepppi/weights/D/
 ├── seed_43/best.weights.h5
 └── seed_44/best.weights.h5
 ```
-模型权重可以通过：https://huggingface.co/wangkun0601/deepppi-d进行下载
+模型权重可以通过：https://huggingface.co/wangkun0601/deepppi-d 进行下载
 
 ## ProMoAI
 
