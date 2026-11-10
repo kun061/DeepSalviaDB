@@ -74,7 +74,6 @@ curl http://127.0.0.1:8002/health
 curl http://127.0.0.1:6006/health
 ```
 
-生产部署建议只让 Uvicorn 监听内网地址，通过 Nginx/FRP 暴露固定 HTTPS 域名；不要公开 MySQL、Ollama、DeepPPI worker、Metabolome worker 或原始模型端口。
 
 
 ## 引用
