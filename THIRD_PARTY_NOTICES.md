@@ -16,8 +16,3 @@ Citation:
 
 The upstream repository is not vendored into this project. The files under `promoai/scripts/` implement this project's DSS3 dataset construction, head-only fine-tuning, evaluation, and threshold analysis. Users must obtain the original pretrained checkpoints from the upstream Hugging Face repositories.
 
-If fine-tuned ProMoAI weights are redistributed, the conservative compliance approach is to publish them under CC BY-NC-SA 4.0, preserve the attribution above, identify them as modified/fine-tuned derivatives, and prohibit commercial use unless separate permission is obtained from the upstream rights holder.
-
-## Other dependencies
-
-Python libraries are installed through `requirements.txt` and retain their own licenses. They are not relicensed by this repository.
