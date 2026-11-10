@@ -148,13 +148,6 @@ class Generator:
             num_predict=int(os.getenv("SALVIACHAT_GENERATOR_NUM_PREDICT", "1024")),
             keep_alive=os.getenv("SALVIACHAT_KEEP_ALIVE", "24h"),
         )
-        # self.llm = ChatOpenAI(
-        #     model="deepseek-chat", # 👈 模型版本写在这里 (DeepSeek V3)
-        #     api_key="YOUR_API_KEY", 
-        #     base_url="https://api.deepseek.com",
-        #     temperature=0,
-        #     max_tokens=2000
-        # )
         self.abbreviation_map = {
             "Mapping Dictionary": {
                 "T0": "0h Start (Baseline)",
@@ -184,7 +177,6 @@ class Generator:
         import re
         matches = []
         
-        # ⚠️ 请务必确保这里的路径和文件名后缀是正确的 (.csv)
         file_path = os.getenv("SALVIACHAT_HOMOLOGY_CSV", str(Path(__file__).resolve().parents[2] / "data" / "Homology.csv")) 
         
         try:
@@ -192,15 +184,12 @@ class Generator:
                 logger.warning("Homology CSV file not found.")
                 return []
             
-            # 核心技巧：将 SQL 的 f%3%1 转换为 Python 正则的 f.*3.*1
             pattern = fuzzy_term.replace('%', '.*')
             regex = re.compile(pattern, re.IGNORECASE)
             
-            # utf-8-sig 能自动处理 Windows Excel 导出的带 BOM 的 CSV 文件
             with open(file_path, mode='r', encoding='utf-8-sig') as f:
                 reader = csv.DictReader(f)
                 
-                # 自动寻找列名中包含 alias/aliases 的列
                 alias_col_name = None
                 if reader.fieldnames:
                     for field in reader.fieldnames:
@@ -217,12 +206,10 @@ class Generator:
                     if not aliases_raw:
                         continue
                         
-                    # 很多 CSV 里的别名是用逗号或分号隔开的，比如 "F3H1, SmF3H"
                     alias_list = re.split(r'[,;]\s*', aliases_raw)
                     
                     for alias in alias_list:
                         alias = alias.strip()
-                        # 重点：同时支持精准部分匹配和漏打字母的正则匹配
                         if strict_term in alias.lower() or regex.search(alias):
                             matches.append(f"{alias} (Gene Alias)")
                             if len(matches) >= 3: 
@@ -233,40 +220,27 @@ class Generator:
             
         return matches
     async def _extract_entity(self, question: str, config: RunnableConfig) -> str:
-        """用 LLM 提取用户问题中的核心查询词"""
-        extract_prompt = f"""
-        Extract the core biological entity (like gene name, chromosome, species, or compound) from this user question.
-        Return ONLY the entity name, nothing else.
-        Question: "{question}"
-        """
         response = await self.llm.ainvoke([HumanMessage(content=extract_prompt)])
         return response.content.strip()
 
     def _fetch_database_matches(self, target_entity: str) -> list:
-        """执行混合降级查询：跨越 MySQL 和本地 Homology 文件"""
         import re
         if not target_entity or len(target_entity) < 2:
             return []
             
         try:
-            # 🚀 核心修复：剔除大模型经常附带的“生物学通用废话”
-            # 把 "chromosome Chr85" 强制剥离成 "Chr85"
             stop_words = r'(?i)(chromosome|chrom|gene|protein|rna|cds|species|compound|metabolite|alias)\s*'
             target_entity = re.sub(stop_words, '', target_entity).strip()
             
-            # 清洗并拆分为模糊匹配模式
             clean_term = re.sub(r'[^a-zA-Z0-9_\-\u4e00-\u9fa5]', '', target_entity)
             if not clean_term: 
                 return []
             
             strict_term = clean_term[:6].lower()
-            # 截取前 4 个字符构造极致模糊匹配 (Chr85 -> c%h%r%8)
             fuzzy_term = "%".join(list(clean_term[:4].lower())) 
             
-            # 1. 捞取 Homology CSV 文件中的别名
             file_matches = self._search_homology_aliases(strict_term, fuzzy_term)
-            
-            # 2. 捞取 MySQL 中的其他实体
+        
             conn = mysql.connector.connect(**self.db_config)
             cursor = conn.cursor(dictionary=True)
             
@@ -299,16 +273,13 @@ class Generator:
             
             sql_matches = [f"{row['matched_name']} ({row['type']})" for row in sql_results if row['matched_name']]
             
-            # 3. 将文件结果和数据库结果合并返回
             combined_matches = file_matches + sql_matches
             return combined_matches[:8]
             
         except Exception as e:
             logger.error(f"Fallback DB search failed: {e}")
             return []
-    # ==========================================
-    # [修改点 1]：将 def 变成 async def，在参数里加上 config: RunnableConfig
-    # ==========================================
+
     async def generate(self, state: Dict[str, Any], config: RunnableConfig) -> Dict[str, Any]:
         # Keep metadata
         metadata = state.get("metadata", {})
@@ -324,9 +295,7 @@ Please generate a polite response that:
 3. Politely declines to answer the current question
 4. Keep the response concise and professional
 """
-           # ==========================================
-            # [修改点 2]：将 invoke 改为 await ainvoke,关键：把 config 传进去
-            # ==========================================
+
             response =await self.llm.ainvoke([SystemMessage(content=irrelevant_prompt)],config=config)
             
             return {
@@ -388,18 +357,12 @@ Please generate a polite response that:
                 "metadata": metadata,
                 "thinking_content": "Returned a deterministic evidence-safe no-result answer.",
             }
-        # ============================================================
-        # 步骤 3：图表数据构建逻辑 (Chart Logic) [多组学全能升级版]
-        # ============================================================
         chart_payload = None
         
-        # 1. 意图检测 (Intent Detection)
         q_lower = original_question.lower()
         
-        # A. 显式画图需求：加入英文 compare, distribute, trend
         explicit_viz_keywords = ["visualiz", "chart", "plot", "graph", "diagram", "画图", "绘图", "图表", "可视化", "柱状图", "条形图", "折线图", "曲线图", "散点图", "饼图", "饼状图", "趋势", "对比", "比较", "分布", "占比", "compare", "distribut", "trend"]
         
-        # B. 隐式数据需求
         implicit_data_keywords = [
             "fpkm", "rpkm", "count", "tpm", "expression", "表达量", "丰度",
             "phenotype", "phenotypic", "trait", "height", "length", "weight", "content", "activity", 
@@ -412,24 +375,19 @@ Please generate a polite response that:
         user_wants_viz = explicit_viz_requested or \
                          any(k in q_lower for k in implicit_data_keywords)
         
-        # 2. 数据处理：构建不同类型的 ECharts 数据
         if db_results and len(db_results) > 0:
             first_row = db_results[0]
             
-            # 【关键修复 1】：只限制 Y 轴的数值，不限制 X 轴！
             y_exclude_keys = [
                 'gene_id', 'species_name', 'chromosome', 'start_bp', 'end_bp', 'strand', 
                 'compound_id', 'sample_id', 'id', 'compound_name', 'name',
                 'm/z', 'mz', 'rt', 'retention_time', 'formula', 'adduct'
             ]
-            # --------------------------------------------------
-            # 🌟 场景 0: 基因密度热力图 (Gene Density Heatmap)
-            # 特征：用户明确问 density，且返回结果包含大量的 start_bp
-            # --------------------------------------------------
+
             if ("density" in q_lower or "密度" in q_lower) and "start_bp" in first_row:
                 bin_size = 100000
                 
-                # 1. 遍历所有查询结果，按染色体分组整理位置数据
+
                 chrom_data = {}
                 # species_label = first_row.get("species_name", "Species")
                 
@@ -441,17 +399,16 @@ Please generate a polite response that:
                             chrom_data[chrom] = []
                         chrom_data[chrom].append(int(pos))
                 
-                # 2. 如果成功分出了染色体数据
+
                 if chrom_data:
                     chromosomes_payload = []
                     
                     for chrom, positions in chrom_data.items():
                         max_pos = max(positions)
-                        # 初始化 Bins 数组
+
                         num_bins = (max_pos // bin_size) + 1
                         bins = [0] * num_bins
                         
-                        # 基因填入 Bins
                         for pos in positions:
                             bin_idx = pos // bin_size
                             if bin_idx < num_bins:
@@ -459,16 +416,13 @@ Please generate a polite response that:
                                 
                         chromosomes_payload.append({
                             "name": chrom,
-                            "length": max_pos, # 加缓冲
+                            "length": max_pos, 
                             "bins": bins,
-                            "total_genes": len(positions) # 记录总基因数用于可能的排序
+                            "total_genes": len(positions) 
                         })
                     
-                    # 3. 核心逻辑：按染色体长度排序（从大到小），并只截取前 8 条
-                    # (如果你想按基因最密集排序，可以改成 key=lambda x: x["total_genes"]/x["length"])
                     chromosomes_payload = sorted(chromosomes_payload, key=lambda x: x["length"], reverse=True)[:8]
 
-                    # 4. 构建完美适配前端的 Chart Payload
                     chart_payload = {
                         "type": "heatmap_custom",
                         "title": f"Gene Density",
@@ -476,9 +430,6 @@ Please generate a polite response that:
                         "chromosomes": chromosomes_payload
                     }
                     first_row = {}
-            # --------------------------------------------------
-            # 场景 1: 重测序质量控制 (QC) -> 散点图 Scatter Plot
-            # --------------------------------------------------
             if "gc_content" in first_row and ("number_of_reads" in first_row or "clean_reads" in first_row):
                 y_key = "number_of_reads" if "number_of_reads" in first_row else "clean_reads"
                 scatter_data = []
@@ -498,25 +449,20 @@ Please generate a polite response that:
                         "data": scatter_data
                     }
 
-            # --------------------------------------------------
-            # 🌟 场景 2: 饼图逻辑 (绝对互斥版：支持突变双饼图 & 通用单饼图)
-            # --------------------------------------------------
             first_keys_str = " ".join(first_row.keys()).lower()
             is_summary_pie = any(k in first_keys_str for k in ["impact_", "snp_", "indel_", "missense_"])
             is_explicit_pie = any(k in q_lower for k in ["pie", "饼图", "饼状图", "占比", "distribution"])
             
-            # 🚀 绝对互斥路由起点（只要进了这个 if，底下的 elif 绝对不执行）
+
             if is_summary_pie or (is_explicit_pie and len(db_results) > 1):
                 
                 if is_summary_pie:
-                    # 1. 提取突变类型数据 (SNP vs INDEL)
                     type_data = []
                     if first_row.get("snp_count") is not None and float(first_row["snp_count"]) > 0: 
                         type_data.append({"name": "SNP", "value": float(first_row["snp_count"])})
                     if first_row.get("indel_count") is not None and float(first_row["indel_count"]) > 0: 
                         type_data.append({"name": "INDEL", "value": float(first_row["indel_count"])})
 
-                    # 2. 提取突变影响数据 (HIGH/MODERATE/LOW/MODIFIER)
                     impact_keys = {
                         "impact_high": "HIGH Impact", "impact_moderate": "MODERATE Impact", 
                         "impact_low": "LOW Impact", "impact_modifier": "MODIFIER",
@@ -524,7 +470,6 @@ Please generate a polite response that:
                     }
                     impact_data = []
                     for db_key, display_name in impact_keys.items():
-                        # 兼容大模型可能返回的大写或小写字段名
                         real_key = next((k for k in first_row.keys() if db_key in k.lower()), None)
                         if real_key and first_row.get(real_key) is not None and float(first_row[real_key]) > 0: 
                             impact_data.append({"name": display_name, "value": float(first_row[real_key])})
@@ -556,13 +501,8 @@ Please generate a polite response that:
                             "data": pie_data
                         }
 
-            # --------------------------------------------------
-            # 场景 3: 单行宽表 (处理表达量/单行激素等) -> 柱状图/折线图
-            # --------------------------------------------------
-            # 🚀 极其重要的 elif：一旦被饼图认领，这里就会彻底锁死，防止柱状图抢戏！
             elif len(db_results) == 1 and user_wants_viz:
                 row = db_results[0]
-                # 🛡️ 量纲冲突拦截器
                 keys_str = " ".join(row.keys()).lower()
                 has_length = "length" in keys_str or "diameter" in keys_str
                 has_weight = "weight" in keys_str
@@ -601,14 +541,10 @@ Please generate a polite response that:
                             "unit": detected_unit
                         }
 
-            # --------------------------------------------------
-            # 场景 4: 多行长表 (栽培种丰度对比、物种大小对比等) -> 柱状图
-            # --------------------------------------------------
             elif len(db_results) > 1 and user_wants_viz:
                 x_col = None
                 y_col = None
                 
-                # 智能寻找 X轴(文本) 和 Y轴(数值)
                 for k, v in first_row.items():
                     if isinstance(v, str):
                         if any(hint in k.lower() for hint in ['gene', 'taxon', 'name', 'species', 'sample', 'library', 'cultivar', 'compound', 'chromosome', 'stage', 'category']):
@@ -664,33 +600,21 @@ Please generate a polite response that:
                             "unit": detected_unit
                         }
 
-        # ============================================================
-        # 步骤 5：表格数据展示逻辑 (Smart Table Logic)
-        # ============================================================
         frontend_table_data = None
         
-        # 🚀 核心修改：拦截器
-        # 如果上方已经成功构建了基因密度热力图，或者问题中包含 density/密度 关键字，直接保持 frontend_table_data 为 None
         if (chart_payload and chart_payload.get("type") == "heatmap_custom") or "density" in q_lower or "密度" in q_lower:
             logger.info("Gene density query detected. Table display is intercepted and disabled.")
-            frontend_table_data = None  # 确保不传入任何表格数据
+            frontend_table_data = None  
             
-        # 只有在非密度查询时，才走原有的表格展示规则
         elif db_results and isinstance(db_results, list) and len(db_results) > 0:
             row_count = len(db_results)
             col_count = len(db_results[0].keys()) if row_count > 0 else 0
             
-            # 规则 A: 多行数据 -> 展示表格
             if row_count > 1:
-                frontend_table_data = db_results[:100] # 限制最大行数
-            # 规则 B: 单行数据且字段多 -> 展示表格
+                frontend_table_data = db_results[:100] 
             elif row_count == 1 and col_count > 5:
                 frontend_table_data = db_results
-            # 其他情况 -> 不展示表格
 
-        # ============================================================
-        # 步骤 5：构建 Prompt
-        # ============================================================
         authoritative_results = _bounded_evidence_json(authoritative_evidence)
         
         combined_prompt = f"""
