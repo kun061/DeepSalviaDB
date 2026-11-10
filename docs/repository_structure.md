@@ -1,13 +1,5 @@
 # 仓库目录与文件说明
 
-## 命名规则
-
-- 产品目录统一使用小写名称：`deepppi`、`promoai`、`metabolome_service`、`salviachat`。
-- Python 模块和普通文件使用 `snake_case`。
-- FastAPI 应用入口统一命名为 `app.py`，启动形式为 `uvicorn app:app`。
-- 功能路由放入 `routers/`，训练代码放入 `training/`，辅助程序放入 `scripts/`。
-- `README.md`、`LICENSE` 等约定文件保留标准大写名称；产品品牌在正文中仍写作 DeepPPI、ProMoAI 和 SalviaChat。
-
 ## 根目录
 
 | 路径 | 作用 |
