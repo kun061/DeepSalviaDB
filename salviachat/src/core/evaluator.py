@@ -183,7 +183,6 @@ class Evaluator:
             }
 
         messages = state["messages"]
-        # Get all user messages
         user_question = [msg for msg in messages if isinstance(msg, HumanMessage) and msg.additional_kwargs.get("type") == "user_question"]
 
         if not user_question:
@@ -196,12 +195,8 @@ class Evaluator:
                 }
             }
         
-        # Get first user question
         original_question = user_question[0].content
 
-        # A SQL execution error is not an empty biological result. Route it back
-        # to SQL generation with the exact database diagnostic until a later
-        # successful database response supersedes it.
         latest_error = next(
             (
                 (index, msg.content) for index, msg in reversed(list(enumerate(messages)))
@@ -234,8 +229,6 @@ class Evaluator:
                 },
             }
 
-        # Deterministic gate: a non-empty result is not sufficient when it
-        # omits fields explicitly requested by the user.
         db_responses = [
             msg.additional_kwargs.get("results")
             for msg in messages
@@ -270,8 +263,6 @@ class Evaluator:
                     "thinking_content": reason,
                 },
             }
-        # One schema-aware retry prevents a syntactically valid but semantically
-        # wrong query from being mistaken for evidence that the data do not exist.
         empty_hint = (
             _empty_result_repair_hint(original_question)
             if latest_results == [] and eval_count == 1
@@ -319,8 +310,6 @@ class Evaluator:
                 },
             }
 
-        # Successful structured retrieval has already passed deterministic
-        # field/shape/error checks above, so fast mode can skip an evaluator LLM call.
         fast_mode = os.getenv("SALVIACHAT_FAST_MODE", "true").lower() in {"1", "true", "yes", "on"}
         if fast_mode:
             if isinstance(latest_results, list) and latest_results:
@@ -354,7 +343,6 @@ class Evaluator:
                     },
                 }
 
-        # Get related history messages
         agent_history = [
             msg for msg in messages
             if (
@@ -368,14 +356,12 @@ class Evaluator:
             )
         ]
 
-        # Format history as text
         history_text = ""
         for msg in agent_history:
             msg_type = msg.additional_kwargs.get("type", "unknown")
             history_text += f"\n--- {msg_type} ---\n{msg.content}\n"
 
         
-        # Use LLM to evaluate if information is sufficient
         eval_prompt = [
         SystemMessage(content=f"""\
 You are a strict answer evaluator and traffic router.
