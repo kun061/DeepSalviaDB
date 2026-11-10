@@ -7,7 +7,6 @@ ProMoAI uses the Plant DNAGPT-BPE and Plant DNAGPT-6mer pretrained models develo
 - Source code: https://github.com/zhangtaolab/Plant_DNA_LLMs
 - BPE model: https://huggingface.co/zhangtaolab/plant-dnagpt-BPE
 - 6-mer model: https://huggingface.co/zhangtaolab/plant-dnagpt-6mer
-- Upstream license: Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)
 - License text: https://github.com/zhangtaolab/Plant_DNA_LLMs/blob/main/LICENSE
 - Copyright remains with the upstream authors.
 
