@@ -130,4 +130,4 @@ curl http://127.0.0.1:6006/pred/health
 
 ## 引用
 
-请在此处补充论文标题、作者、期刊/预印本 DOI，以及 DeepPPI、ProMoAI 上游模型和数据集引用信息。
+Citation Zhang R; Wang K; Zhang SQ; Wei YK; Li WT; Wang B; Yang FR; Zhu TJ et al. DeepSalviaDB: An intelligent agent-empowered multi-omics platform with versatile artificial intelligence toolkits for Salvia species (2026)
