@@ -31,6 +31,7 @@ tmp/
 .idea/
 
 # Model weights and binary artifacts
+models/
 *.h5
 *.hdf5
 *.pt
@@ -44,25 +45,27 @@ tmp/
 *.bin
 *.index
 
-# DeepPPI private/large assets
-deepppi/data/
+# DeepPPI: publish only the frozen D dataset
+deepppi/data/*
+!deepppi/data/D/
+!deepppi/data/D/**
 deepppi/weights/*
 !deepppi/weights/README.md
 deepppi/results/
 deepppi/runs/
 deepppi/verification/
 
-# ProMoAI private/large assets
+# ProMoAI raw and derived sequence data (redistribution permission pending)
 promoai/DSS3/
 promoai/finetune/
 promoai/Pretrained_Models/
 
-# Metabolome Service private/derived assets
-metabolome_service/data/*
-!metabolome_service/data/README.md
-metabolome_service/results/local_cv/
-metabolome_service/artifacts/
-metabolome_service/*.joblib
+# TMC-Miner private/derived assets
+tmc_miner/data/*
+!tmc_miner/data/README.md
+tmc_miner/results/local_cv/
+tmc_miner/artifacts/
+tmc_miner/*.joblib
 
 # SalviaChat private/large assets
 salviachat/data/*

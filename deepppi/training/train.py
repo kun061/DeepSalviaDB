@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
-from review_metrics import binary_metrics, vertex_bootstrap
+from metrics import binary_metrics, vertex_bootstrap
 
 AA = 'ACDEFGHIKLMNPQRSTVWY'
 TABLE = bytes({ord(c): i + 1 for i, c in enumerate(AA)}.get(n, 0) for n in range(256))
@@ -305,7 +305,7 @@ def main():
     prepared_hash = sha_file(args.prepared_dir / 'manifest.json')
     versions = {'python': sys.version, 'platform': platform.platform(), 'gpu': [d.name for d in tf.config.list_physical_devices('GPU')],
                 'packages': {p: importlib.metadata.version(p) for p in ('tensorflow', 'keras', 'numpy', 'h5py', 'matplotlib')},
-                'scripts': {p.name: sha_file(p) for p in [Path(__file__), Path(__file__).with_name('review_metrics.py')]}}
+                'scripts': {p.name: sha_file(p) for p in [Path(__file__), Path(__file__).with_name('metrics.py')]}}
     save_json(root / 'environment.json', versions)
     freeze = subprocess.run([sys.executable, '-m', 'pip', 'freeze'], capture_output=True, text=True, check=True)
     (root / 'requirements_frozen.txt').write_text(freeze.stdout, encoding='utf-8')

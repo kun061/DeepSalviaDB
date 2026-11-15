@@ -1,0 +1,57 @@
+{
+  "schema_version": 2,
+  "status": "complete",
+  "created_at_utc": "2026-10-22T15:33:55.473222+00:00",
+  "configuration": {
+    "protocol": "protein_disjoint",
+    "seed": 42,
+    "threshold": 900,
+    "max_len": 512,
+    "taxid": "180675",
+    "min_class_per_split": 20
+  },
+  "sampling_arm": "D",
+  "baseline_manifest_sha256": "fb20a979ff1df3826ab2b8c6b4a65cfd7f8e35d1792ccb11a1ae05595cc7b020",
+  "preregistered_config_sha256": "260e094ffffe0daaede97f1b52f3d0bc1860afe9472d6261dbdc89a759d605a8",
+  "protocols": {
+    "protein_disjoint": {
+      "splits": {
+        "train": {
+          "rows": 26210,
+          "labels": {
+            "1": 14326,
+            "0": 11884
+          }
+        },
+        "validation": {
+          "rows": 2839,
+          "labels": {
+            "0": 1269,
+            "1": 1570
+          }
+        },
+        "test": {
+          "rows": 2971,
+          "labels": {
+            "1": 1724,
+            "0": 1247
+          }
+        }
+      }
+    }
+  },
+  "output_sha256": {
+    "protein_disjoint/test.csv.gz": "d04e29b5b097a74f1d59ccd911bc1cfbbc657f46724de00b9e65ebef6b515f2c",
+    "protein_disjoint/train.csv.gz": "c6908e24c480d3aba9d2f34fa1dd34a687663d63b4738219e54dab6c9fce7451",
+    "protein_disjoint/validation.csv.gz": "bc70a151aa62aca5616626456ead78ae95499ea5731020e5606519c629cd2ce8",
+    "proteins.csv.gz": "5faf77a9293179fdd2025f16ea5f8fab68ed2618eec27d70cfab9bd4c72380e6",
+    "protein_disjoint/protein_partitions.csv.gz": "389b8dfdbcec9fe81fda59aec5e14e853013342b0ef9a740ccaf8ca47b718d9a"
+  },
+  "packaging_selection": {
+    "source_manifest_sha256": "3f4f7324a11f54309e9561c5069d96da0b0af49e1efefaa3f1f42e2bf8df5c11",
+    "retained_protocols": [
+      "protein_disjoint"
+    ],
+    "note": "Frozen D pair/sequence bytes unchanged. Scoped manifest and partition provenance retained."
+  }
+}

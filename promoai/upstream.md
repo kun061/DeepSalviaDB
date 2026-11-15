@@ -11,4 +11,3 @@ This repository contains the project-specific parts:
 - REST inference integration.
 
 It intentionally does not copy the complete Plant DNA LLMs source repository or pretrained checkpoints. Download the checkpoints from their official Hugging Face pages and cite the PDLLMs paper.
-

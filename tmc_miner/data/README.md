@@ -1,15 +1,18 @@
-# Metabolome Service data
+# TMC-Miner data
 
-运行服务需要：
+The worker requires these three data files:
 
-| 文件 | 必需字段/作用 |
+| File | Required fields and purpose |
 |---|---|
-| `pred_gene/count_updated.txt` | 行索引 `Geneid`，包含各时期的原始转录本计数，用于 DESeq2。 |
-| `pred_gene/result_fpkm_updated.txt` | `Geneid` 及 DAG30、DAG60、DAG90、DAG240、DAG270、DAG390 的表达重复。 |
-| `pred_gene/pathway_metabolites_intensity.csv` | `Name`、`Pathway` 及六个时期的代谢物强度重复。 |
+| `pred_gene/count_updated.txt` | `Geneid` row index and raw transcript counts by stage; used by DESeq2. |
+| `pred_gene/result_fpkm_updated.txt` | `Geneid` and expression replicates for DAG30, DAG60, DAG90, DAG240, DAG270, and DAG390. |
+| `pred_gene/pathway_metabolites_intensity.csv` | `Name`, `Pathway`, and metabolite-intensity replicates for six stages. |
 
-推荐通过环境变量使用仓库外数据：
+A separate annotation CSV is also needed. Prefer external, access-controlled paths:
 
 ```dotenv
 METABOLOME_DATA_DIR=/absolute/path/to/pred_gene
+METABOLOME_ANNOTATION_PATH=/absolute/path/to/dss_final_annotation.csv
 ```
+
+Check the original provider's terms before redistributing these files.

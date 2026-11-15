@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 @tool
 def run_local_blast(sequence: str, seq_type: str = "nucl") -> str:
+    """Run local BLAST against the configured nucleotide or protein database."""
     clean_seq = sequence.upper().replace("\n", "").replace(" ", "")
     
     if seq_type == "prot":
@@ -112,7 +113,7 @@ def design_qpcr_primers(sequence: str) -> str:
     
     clean_seq = sequence.upper().replace("\n", "").replace(" ", "")
     if len(clean_seq) < 100:
-        # 【关键修改】：不要用“报错”或“失败”这种词，用中性描述，防止 Evaluator 暴走
+        # Use neutral wording for empty results so the evaluator does not overreact.
         return "【引物设计完毕】输入序列过短，无法满足常规引物设计条件。请建议用户提供更长的序列。"
 
     try:
@@ -126,11 +127,11 @@ def design_qpcr_primers(sequence: str) -> str:
                 'PRIMER_MIN_SIZE': 18,
                 'PRIMER_MAX_SIZE': 25,
                 'PRIMER_OPT_TM': 60.0,
-                'PRIMER_MIN_TM': 55.0, # 放宽到 55
-                'PRIMER_MAX_TM': 65.0, # 放宽到 65
-                'PRIMER_MIN_GC': 35.0, # 放宽 GC 含量
+                'PRIMER_MIN_TM': 55.0, # Relax the threshold to 55.
+                'PRIMER_MAX_TM': 65.0, # Relax the threshold to 65.
+                'PRIMER_MIN_GC': 35.0, # Relax the GC-content constraint.
                 'PRIMER_MAX_GC': 65.0,
-                'PRIMER_PRODUCT_SIZE_RANGE': [[80, 200]], # 放宽产物长度
+                'PRIMER_PRODUCT_SIZE_RANGE': [[80, 200]], # Relax the product-length constraint.
             }
         )
 
@@ -142,15 +143,16 @@ def design_qpcr_primers(sequence: str) -> str:
             prod_size = result['PRIMER_PAIR_0_PRODUCT_SIZE']
             return f"【真实引物设计成功】正向引物: {fw_seq} (Tm: {fw_tm:.1f}℃), 反向引物: {rv_seq} (Tm: {rv_tm:.1f}℃), 产物长度: {prod_size}bp。"
         else:
-            # 【关键修改】：同样，把“失败”包装成“正常完成但无结果”
+            # Describe an empty result as a completed query with no matches.
             return "【引物设计完毕】已执行 Primer3 扫描，但由于该序列自身的 GC 含量分布或潜在的发夹结构限制，未能在当前参数下找到理想的引物对。请向用户解释原因。"
             
     except Exception as e:
-        # 把异常也包装一下
+        # Handle the exception in the same way.
         return f"【工具执行中止】引物引擎在处理该特殊序列时遇到限制。说明：{str(e)}"
 
 @tool
 def predict_protein_domains(protein_sequence: str) -> str:
+    """Scan a protein sequence against the configured local Pfam database."""
     logger.info(f"[Tool Exec] 正在调用本地 HMMER 引擎扫描蛋白质结构域...")
     
     clean_seq = protein_sequence.upper().replace("\n", "").replace(" ", "")
@@ -172,7 +174,7 @@ def predict_protein_domains(protein_sequence: str) -> str:
         cmd = [
             "hmmscan", 
             "--tblout", temp_out_path, 
-            "--noali", # 不输出比对细节，节省大模型阅读空间
+            "--noali", # Omit alignment details to reduce model context size.
             "-E", "1e-3", 
             pfam_db_path, 
             temp_fasta_path
@@ -189,13 +191,13 @@ def predict_protein_domains(protein_sequence: str) -> str:
         with open(temp_out_path, 'r') as f:
             for line in f:
                 if not line.startswith("#"):
-                    # hmmscan 的表格是用多个空格分隔的
+                    # hmmscan columns are separated by multiple spaces.
                     cols = line.split()
                     if len(cols) > 18:
                         domain_name = cols[0]
                         pfam_id = cols[1]
                         e_value = cols[4] # Full sequence E-value
-                        description = " ".join(cols[18:]) # 描述在最后，可能有空格
+                        description = " ".join(cols[18:]) # The final description field may contain spaces.
                         
                         formatted_result += f"{domain_name} | {pfam_id} | {e_value} | {description}\n"
                         hit_count += 1
@@ -248,7 +250,7 @@ class ToolComponent:
         self.llm_with_tools = self.llm.bind_tools(ALL_BIO_TOOLS)
 
     def execute_tools(self, state: Dict[str, Any]) -> Dict[str, Any]:
-        """LangGraph 节点入口函数"""
+        """LangGraph node entry point"""
         messages = state["messages"]
         metadata = state.get("metadata", {})
         
@@ -309,6 +311,6 @@ class ToolComponent:
                     additional_kwargs={"type": "tool_agent_response"}
                 )
             ],
-            "next": "evaluator", # 将最终结果交给 evaluator 审查，或者直接交给 generator/END
+            "next": "evaluator", # Pass the result to the evaluator or directly to the generator/end.
             "metadata": {**metadata, "thinking_content": f"Successfully executed tools: {[tc['name'] for tc in ai_response.tool_calls]}"}
         }

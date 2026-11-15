@@ -1,4 +1,4 @@
-"""Check every packaged file and the frozen D protein-disjoint split (stdlib)."""
+"""Check the frozen D protein-disjoint dataset included in this repository."""
 from pathlib import Path
 import csv,gzip,hashlib,json,sys
 from collections import Counter
@@ -13,11 +13,6 @@ def rows(p):
     with gzip.open(p,'rt',encoding='utf-8',newline='') as f:return list(csv.DictReader(f))
 def verify(root=ROOT):
     root=Path(root).resolve()
-    manifest=json.loads((root/'MANIFEST.json').read_text(encoding='utf-8'))
-    for rel,meta in manifest['files'].items():
-        p=(root/rel).resolve()
-        if not p.is_relative_to(root) or p.is_symlink() or not p.is_file():raise ValueError('Unsafe/missing file: '+rel)
-        if p.stat().st_size!=meta['bytes'] or digest(p)!=meta['sha256']:raise ValueError('Integrity mismatch: '+rel)
     d=root/'data/D';meta=json.loads((d/'manifest.json').read_text(encoding='utf-8'))
     for rel,h in meta['output_sha256'].items():
         if digest(d/rel)!=h:raise ValueError('Dataset hash mismatch: '+rel)
@@ -49,9 +44,5 @@ def verify(root=ROOT):
             counts=[len(x&y) for x,y in zip(sets[a],sets[b])]
             if any(counts):raise ValueError('Cross-split leakage: '+a+'/'+b)
             overlaps.append({'left':a,'right':b,'pair_overlap':counts[0],'model_pair_overlap':counts[1],'protein_id_overlap':counts[2],'input_group_overlap':counts[3]})
-    for seed in [42,43,44]:
-        w=root/'weights/D'/('seed_'+str(seed))
-        m=json.loads((w/'run_metadata.json').read_text(encoding='utf-8'))
-        if m['status']!='complete' or digest(w/'best.weights.h5')!=m['weights_sha256']:raise ValueError('Checkpoint mismatch')
-    return {'status':'verified','manifest_files_checked':len(manifest['files']),'dataset':'D/protein_disjoint','counts':summary,'overlap_checks':overlaps,'checkpoints':3}
+    return {'status':'verified','dataset_files_checked':len(meta['output_sha256']),'dataset':'D/protein_disjoint','counts':summary,'overlap_checks':overlaps}
 if __name__=='__main__':print(json.dumps(verify(),ensure_ascii=False,indent=2))

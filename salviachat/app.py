@@ -74,12 +74,11 @@ app.include_router(primer_router, prefix="/primer", tags=["Primer Design Engine"
 
 @app.get("/health", tags=["Service"])
 def health():
-    from routers.promoter import model, model_load_error
     return {
         "status": "ok",
         "services": {
             "salviachat": getattr(app.state, "rag_status", "initializing"),
-            "promoai": "ok" if model is not None else f"unavailable: {model_load_error}",
+            "promoai": "proxied via PROMOAI_WORKER_URL",
             "metabolome": "proxied via METABOLOME_WORKER_URL",
             "deepppi": "proxied via DEEPPPI_WORKER_URL",
         },
@@ -87,5 +86,5 @@ def health():
     }
 
 if __name__ == "__main__":
-    # 本地直接运行入口。
+    # Local entry point.
     uvicorn.run("app:app", host="0.0.0.0", port=6006, reload=False)

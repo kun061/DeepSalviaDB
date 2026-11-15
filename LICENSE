@@ -1,0 +1,30 @@
+DeepSalviaDB Code, Data, and Model Notice
+Copyright 2026 DeepSalviaDB contributors
+
+DeepPPI uses external protein sequences and interaction data. The parts of
+the frozen dataset originating from STRING v12.0 are used under STRING's
+CC BY 4.0 terms. Credit STRING and indicate any changes:
+https://string-db.org/cgi/access?footer_active_subpage=licensing
+Material from other providers remains subject to their original terms.
+
+ProMoAI uses the Plant DNA LLMs / PDLLM foundation models Plant DNAGPT-BPE
+and Plant DNAGPT-6mer from Zhang Tao Lab. This project trains classification
+heads based on those models. The original PDLLM code and foundation models
+belong to their authors and are subject to the upstream CC BY-NC-SA 4.0
+terms. This repository does not relicense the foundation models or fine-tuned
+weights containing their parameters. Any publication of such weights must
+retain the original authors, foundation model provenance, modification
+details, and applicable terms.
+https://github.com/zhangtaolab/Plant_DNA_LLMs
+https://huggingface.co/zhangtaolab/plant-dnagpt-BPE
+https://huggingface.co/zhangtaolab/plant-dnagpt-6mer
+
+External models and services used by SalviaChat, including Ollama/Qwen and
+BGE, as well as other external data and databases used by this project,
+remain subject to their respective providers' terms. This repository does
+not relicense those resources.
+
+When publishing results obtained with this project, also cite the original
+resources actually used.
+PDLLM paper: https://doi.org/10.1016/j.molp.2024.12.006
+STRING v12.0 paper: https://doi.org/10.1093/nar/gkad1000

@@ -171,7 +171,7 @@ class Generator:
             "database": os.getenv("SALVIACHAT_DB_NAME", "salvia")
         }
     def _search_homology_aliases(self, strict_term: str, fuzzy_term: str) -> list:
-        """从 Homology CSV 文件中检索 aliases"""
+        """Retrieve aliases from the homology CSV"""
         import csv
         import os
         import re
@@ -714,7 +714,7 @@ Answer the user's question based on the provided context.
         else:
             logger.info("Generate final answer...")
         # ==========================================
-        # [修改点 3]：将 invoke 改为 await ainvoke
+        # Await ainvoke for asynchronous execution.
         # ==========================================
         response = await self.llm.ainvoke(
             [SystemMessage(content=combined_prompt)], config=config

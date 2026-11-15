@@ -3,7 +3,7 @@ import re
 import json
 import logging
 from pathlib import Path
-import pandas as pd # 必须引入 pandas
+import pandas as pd # Pandas is required for this lookup.
 from langchain_core.messages import SystemMessage
 
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ def load_gene_mapping_once(csv_path=None):
 
     global GLOBAL_GENE_MAPPING, MAPPING_LOADED
     if MAPPING_LOADED:
-        return # 已经加载过了，直接跳过
+        return # Skip if the lookup is already loaded.
         
     logger.info(f"开始加载本地基因映射表: {csv_path}")
     try:
@@ -26,7 +26,7 @@ def load_gene_mapping_once(csv_path=None):
             aliases_str = str(row.get('aliases', '')).strip()
             symbol = str(row.get('symbol', '')).strip()
             
-            # 把 symbol 和 aliases 合并为所有可能的查询词
+            # Combine symbols and aliases into lookup terms.
             possible_names = []
             if symbol and symbol not in ('-', 'nan'):
                 possible_names.append(symbol.lower())
@@ -34,7 +34,7 @@ def load_gene_mapping_once(csv_path=None):
                 aliases_list = [a.strip().lower() for a in aliases_str.split(',')]
                 possible_names.extend(aliases_list)
                 
-            # 🎯 构建精确 ID 字典 (注意：左侧名字将作为下游 target_species 返回)
+            # Build the exact-ID dictionary; left-hand names become target_species values.
             precise_ids = {
             "Salvia_bowleyana": row.get('Salvia_bowleyana', None),
             "Salvia divinorum": row.get('Salvia divinorum', None),
@@ -44,12 +44,12 @@ def load_gene_mapping_once(csv_path=None):
             "Salvia_miltiorrhiza_sami-il01": row.get('Salvia_miltiorrhiza_sami-il01', None),
             "Salvia hispanica": row.get('Salvia hispanica', None),
             "Salvia splendens": row.get('Salvia splendens', None)
-            # ... 继续添加其他你需要查询的列
+            # Add any other columns needed for lookup.
             }
-            # 清理空值
+            # Remove missing values.
             precise_ids = {k: v for k, v in precise_ids.items() if pd.notna(v) and str(v).strip() != '-'}
             
-            # 注入全局字典
+            # Populate the shared lookup dictionary.
             for name in possible_names:
                 if name:
                     if name not in mapping:
@@ -69,7 +69,7 @@ class EntityLinker:
         self.mapping = GLOBAL_GENE_MAPPING
 
     def _extract_entities(self, query, llm):
-        """利用 Few-Shot 提取俗名，并根据意图进行双轨物种映射"""
+        """Extract common names with few-shot examples and map species by intent"""
         prompt = f"""
         你是一个多组学生物信息学实体提取器。请提取：基因别名(alias)、查询意图(query_type)和物种名(species)。
         
@@ -107,25 +107,25 @@ class EntityLinker:
             response = llm.invoke([SystemMessage(content=prompt)])
             content = response.content
             
-            # 🚀 强大的正则提取，专治大模型废话
+            # Extract the structured result even when the model adds extra text.
             json_match = re.search(r'(\{.*?\})', content, re.DOTALL)
             
             if json_match:
                 json_str = json_match.group(1)
                 return json.loads(json_str)
             else:
-                # 备用方案：如果正则没抓到，尝试直接暴力解析
+                # Fall back to direct parsing if the regex does not match.
                 clean_content = content.replace("```json", "").replace("```", "").strip()
                 return json.loads(clean_content)
                 
         except Exception as e:
-            # 💡 极度关键：把大模型到底回复了什么鬼东西打印出来！
+            # Log the raw model response for debugging.
             raw_response = getattr(response, "content", "<no response>")
             logger.warning(f"实体提取失败: {e} | 大模型原始回复: {raw_response}")
             return {"alias": None, "species": None, "query_type": "genome"}
 
     def _search_local_dict(self, alias, species, query_type):
-        """去内存字典查询，区分表达量(DSS3单轨)和基因组(多轨)"""
+        """Look up identifiers in memory using separate expression and genomic paths"""
         if not self.mapping:
             logger.error("🚨 基因字典为空！请检查服务器上的 CSV 路径和文件是否正确！")
             return []
@@ -139,15 +139,15 @@ class EntityLinker:
         results = []
         for record in matched_records:
             # ==========================================
-            # 🚀 轨道 B：表达量/转录组查询 (强行降维到 DSS3)
+            # Path B: map expression/transcriptome lookups to DSS3 IDs.
             # ==========================================
             if query_type == "expression":
-                # 1. 不管用户问什么物种，找基因ID时统统去拿 'Salvia miltiorrhiza--DSS3' 这一列的值
+                # 1. Use the 'Salvia miltiorrhiza--DSS3' column for expression gene IDs.
                 dss3_id = record.get("Salvia miltiorrhiza--DSS3")
                 
                 if dss3_id:
-                    # 2. 伪装结果：ID用DSS3的，但物种名原封不动保留用户问的（比如 Salvia aerea）
-                    # 这样 Agent 下一步去查 SQL 表达量表时，才知道找哪个样本的数据
+                    # 2. Use the DSS3 ID while preserving the species named by the user.
+                    # This lets the agent choose the appropriate sample in the SQL expression table.
                     target_species = species if species not in ["null", "all", None] else "Salvia miltiorrhiza--DSS3"
                     results.append({
                         "species": target_species,
@@ -155,12 +155,12 @@ class EntityLinker:
                     })
             
             # ==========================================
-            # 🧬 轨道 A：基因组查询 (严格物种对应)
+            # Path A: keep strict species mapping for genomic queries.
             # ==========================================
             else:
                 for sp_name, exact_id in record.items():
                     if species and species not in ["null", "all"]:
-                        # 只有当包含目标物种时才保留
+                        # Keep only records for the target species.
                         if species.lower() not in sp_name.lower():
                             continue
                             
@@ -169,7 +169,7 @@ class EntityLinker:
                         "standard_id": exact_id
                     })
                     
-        # 去重并返回
+        # Deduplicate and return results.
         return [dict(t) for t in {tuple(d.items()) for d in results}]
 
     def _extract_entities_fast(self, query):
@@ -213,7 +213,7 @@ class EntityLinker:
         fast_mode = os.getenv("SALVIACHAT_FAST_MODE", "true").lower() in {"1", "true", "yes", "on"}
         entities = self._extract_entities_fast(query) if fast_mode else self._extract_entities(query, llm)
         
-        # 🛡️ 防御 1：如果大模型彻底抽风返回了 None，手动给一个兜底字典
+        # Provide a fallback dictionary if the model returns None.
         if not entities:
             logger.warning("大模型未返回有效实体，启用兜底机制。")
             entities = {"alias": "null", "species": "all", "query_type": "genome"}
@@ -225,15 +225,15 @@ class EntityLinker:
         if not alias or alias == "null":
             return {"status": "no_alias", "query": query}
 
-        # 去本地查字典
+        # Look up the value in the local dictionary.
         matched_results = self._search_local_dict(alias, species, query_type)
 
         if not matched_results:
             return {"status": "not_found", "query": query}
 
         # ==========================================
-        # 下面的代码【完全不改】！
-        # 因为 matched_results 和你之前的 neo4j_results 结构完全一样！
+        # Preserve the downstream result structure.
+        # matched_results has the same structure as the former neo4j_results.
         # ==========================================
         if species == "all":
             id_list = [f"'{record['standard_id']}'" for record in matched_results]
@@ -278,5 +278,5 @@ class EntityLinker:
             return {"status": "not_found", "query": query}
 
     def close(self):
-        # 不再需要关闭数据库连接
+        # No database connection needs to be closed.
         pass

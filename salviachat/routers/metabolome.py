@@ -42,7 +42,7 @@ async def metabolome_health():
             response.raise_for_status()
             return response.json()
     except httpx.RequestError as exc:
-        raise HTTPException(status_code=503, detail=f"Metabolome worker unavailable: {exc}") from exc
+        raise HTTPException(status_code=503, detail=f"TMC-Miner worker unavailable: {exc}") from exc
     except httpx.HTTPStatusError as exc:
         raise HTTPException(
             status_code=exc.response.status_code,
@@ -61,12 +61,12 @@ async def predict_metabolome_genes(req: PredictionRequest):
     except httpx.ConnectError as exc:
         raise HTTPException(
             status_code=503,
-            detail="Metabolome worker 未启动；请先在 metabolome_service 目录启动 8002 端口。",
+            detail="TMC-Miner worker 未启动；请先在 tmc_miner 目录启动 8002 端口。",
         ) from exc
     except httpx.TimeoutException as exc:
         raise HTTPException(
             status_code=504,
-            detail="Metabolome worker 计算超时；可调大 METABOLOME_WORKER_TIMEOUT。",
+            detail="TMC-Miner worker 计算超时；可调大 METABOLOME_WORKER_TIMEOUT。",
         ) from exc
     except httpx.HTTPStatusError as exc:
         raise HTTPException(
@@ -74,4 +74,4 @@ async def predict_metabolome_genes(req: PredictionRequest):
             detail=response_detail(exc.response),
         ) from exc
     except httpx.RequestError as exc:
-        raise HTTPException(status_code=503, detail=f"Metabolome worker unavailable: {exc}") from exc
+        raise HTTPException(status_code=503, detail=f"TMC-Miner worker unavailable: {exc}") from exc

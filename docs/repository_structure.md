@@ -1,112 +1,113 @@
-# 仓库目录与文件说明
+# Repository structure and file guide
 
-## 根目录
+## Repository root
 
-| 路径 | 作用 |
+| Path | Purpose |
 |---|---|
-| `README.md` | 项目总览、服务入口、启动方法和发布注意事项|
-| `.env.example` | 环境变量模板，只保留占位值，不包含真实密钥|
-| `.gitignore` | 排除权重、数据、数据库、日志、缓存和本地配置|
-| `requirements.txt` | 统一 API 网关和常用功能的 Python 依赖|
-| `THIRD_PARTY_NOTICES.md` | Plant DNA LLMs 等第三方代码、模型和许可证说明|
+| `README.md` | Project overview, service entry points, startup steps, and release notes. |
+| `.env.example` | Environment-variable template with placeholders and no real credentials. |
+| `.gitignore` | Excludes weights, private data, databases, logs, caches, and local configuration. |
+| `requirements.txt` | Python dependencies for the gateway and common inference services. |
+| `LICENSE` | Third-party data and model provenance notice; an original-code license has not yet been selected. |
 
 ## `docs/`
 
-| 文件 | 作用 |
+| File | Purpose |
 |---|---|
-| `api.md` | REST API 路由、请求参数和响应形式|
-| `model_assets.md` | 仓库外模型、数据和数据库的放置位置及发布要求|
-| `repository_structure.md` | 本清单|
+| `api.md` | REST endpoints, request examples, and response formats. |
+| `model_assets.md` | Model repositories, checksums, external data paths, and release notes. |
+| `release_checklist.md` | Checks required before labeling a release as final. |
+| `repository_structure.md` | This file guide. |
 
 ## `deepppi/`
 
-| 路径 | 作用 |
+| Path | Purpose |
 |---|---|
-| `README.md` | DeepPPI-D 的模型方法、训练、评估和推理说明|
-| `app.py` | DeepPPI 独立 FastAPI worker，加载三个种子模型并提供 PPI 推理|
-| `data_scope.json` | 训练/验证/测试数据及外部资源范围清单|
-| `environment/environment.yml` | 原始 Conda 环境定义，供完整复现参考。 |
-| `environment/requirements.lock.txt` | 已冻结的 pip 包版本。 |
-| `scripts/run.sh` | DeepPPI 训练、评估等常用命令入口。 |
-| `scripts/reproduce.py` | 按配置运行复现实验。 |
-| `scripts/verify_package.py` | 外部资产就位后核对数据、权重和清单。 |
-| `training/train.py` | DeepPPI-D 训练和模型保存逻辑。 |
-| `training/metrics.py` | 汇总并计算复现实验评价指标。 |
-| `weights/README.md` | 三个种子权重的预期结构；实际权重不进入 Git。 |
+| `README.md` | DeepPPI-D data, training, and inference instructions. |
+| `app.py` | Standalone FastAPI worker that loads three seed models and predicts PPI probabilities. |
+| `data_scope.json` | Scope of published train/validation/test data and external resources. |
+| `data/D/` | Frozen protein sequences, data splits, partitions, and manifest. |
+| `environment/environment.yml` | Separate Conda training environment for TensorFlow. |
+| `environment/requirements.lock.txt` | Locked pip package versions for training. |
+| `scripts/run.sh` | Data verification, training smoke test, and from-scratch training entry points. |
+| `scripts/verify_package.py` | Checks frozen D dataset and split overlap, not external weights. |
+| `training/train.py` | DeepPPI-D training and model saving. |
+| `training/metrics.py` | Metrics for reproduction experiments. |
+| `weights/README.md` | Expected layout for three external seed checkpoints. |
 
 ## `promoai/`
 
-| 路径 | 作用 |
+| Path | Purpose |
 |---|---|
-| `README.md` | ProMoAI 数据构建、模型训练、评估与上游关系说明。 |
-| `upstream.md` | Plant DNA LLMs 的来源、使用边界和引用要求。 |
-| `scripts/README.md` | 实验脚本的推荐执行顺序与输入输出。 |
-| `scripts/build_dss3_chromosome_holdout_v4_gc_matched.py` | 构建按染色体留出的 GC 匹配 DSS3 数据集。 |
-| `scripts/train_dss3_bpe_1000bp_head_only.py` | 训练 BPE 版本的 1 kb 启动子分类头。 |
-| `scripts/evaluate_dss3_bpe_1000bp.py` | 评估 BPE 模型。 |
-| `scripts/train_dss3_6mer_1000bp_head_only_v4_gc.py` | 训练 6-mer 版本的 1 kb 启动子分类头。 |
-| `scripts/evaluate_dss3_6mer_1000bp_v4_gc.py` | 评估 6-mer 模型。 |
-| `scripts/analyze_dss3_v4_threshold_sensitivity.py` | 分析分类阈值对开发集和测试集指标的影响。 |
-| `results/bpe_v4_seed42/` | BPE 配置、加载审计、验证曲线和测试汇总；不含权重与逐条预测。 |
-| `results/6mer_v4_seed42/` | 6-mer 配置与汇总指标；不含权重与逐条预测。 |
-| `results/threshold_sensitivity/` | 阈值敏感性汇总和报告。 |
-| `results/baselines/` | RF、SVM、CNN 基线配置及开发集/测试集汇总。 |
-| `results/comparison.csv` | 各模型最终指标对比表。 |
+| `README.md` | ProMoAI data construction, training, evaluation, and upstream relationship. |
+| `app.py` | Standalone worker that loads the BPE classifier and serves predictions on port 8003. |
+| `requirements.txt` | Minimum worker dependencies. |
+| `upstream.md` | Plant DNA LLMs provenance and usage boundaries. |
+| `scripts/README.md` | Suggested order for experiment scripts. |
+| `scripts/build_dss3_chromosome_holdout_v4_gc_matched.py` | Builds a GC-matched DSS3 dataset with chromosome holdout. |
+| `scripts/train_dss3_bpe_1000bp_head_only.py` | Trains the BPE 1 kb promoter classification head. |
+| `scripts/evaluate_dss3_bpe_1000bp.py` | Evaluates the BPE classifier. |
+| `scripts/train_dss3_6mer_1000bp_head_only_v4_gc.py` | Trains the 6-mer 1 kb promoter classification head. |
+| `scripts/evaluate_dss3_6mer_1000bp_v4_gc.py` | Evaluates the 6-mer classifier. |
+| `scripts/analyze_dss3_v4_threshold_sensitivity.py` | Analyzes development and test metrics across thresholds. |
+| `results/bpe_v4_seed42/` | BPE configuration, loading audit, validation history, and test summary. |
+| `results/6mer_v4_seed42/` | 6-mer configuration and summary metrics. |
+| `results/threshold_sensitivity/` | Threshold sensitivity summaries and report. |
+| `results/baselines/` | RF, SVM, and CNN baseline configurations and summary metrics. |
+| `results/comparison.csv` | Final metrics comparison across models. |
 
-`promoai/` 不复制 Plant DNA LLMs 的完整上游仓库。用户应依据 `upstream.md` 获取有权使用的预训练模型。
+This repository does not copy the full Plant DNA LLMs upstream source. Obtain authorized pretrained models according to `upstream.md`.
 
-### ProMoAI 结果文件
+### ProMoAI result files
 
-| 文件名 | 作用 |
+| File | Purpose |
 |---|---|
-| `best_dev.json` | 最佳开发集检查点的汇总指标。 |
-| `training_config.json`、`model_config.json`、`tokenizer_config.json` | 训练、模型和分词器配置快照。 |
-| `model_loading_report.json`、`input_length_audit.json`、`data_manifest.json` | 模型加载、输入长度和数据范围审计。 |
-| `validation_metrics.csv`、`training_history.csv` | 逐轮验证指标和训练历史。 |
-| `test_metrics.json`、`confusion_matrix.csv` | 固定测试集的汇总指标和混淆矩阵。 |
-| `baselines/*/config.json` | RF、SVM、CNN 各基线配置。 |
-| `baselines/*/dev_metrics.json`、`test_metrics.json` | 各基线开发集和测试集汇总。 |
-| `threshold_metrics_dev.csv`、`threshold_metrics_test.csv` | 不同分类阈值下的指标。 |
-| `threshold_sensitivity_summary.json`、`threshold_sensitivity_report.md`、`audit.json` | 阈值实验汇总、可读报告和输入审计。 |
+| `best_dev.json` | Summary metrics for the best development checkpoint. |
+| `training_config.json`, `model_config.json`, `tokenizer_config.json` | Training, model, and tokenizer configuration snapshots. |
+| `model_loading_report.json`, `input_length_audit.json`, `data_manifest.json` | Model loading, input-length, and data-scope audits. |
+| `validation_metrics.csv`, `training_history.csv` | Validation metrics and epoch-by-epoch training history. |
+| `test_metrics.json`, `confusion_matrix.csv` | Fixed-test summary and confusion matrix. |
+| `baselines/*/config.json` | Baseline configurations for RF, SVM, and CNN. |
+| `baselines/*/dev_metrics.json`, `test_metrics.json` | Development and test summaries for each baseline. |
+| `threshold_metrics_dev.csv`, `threshold_metrics_test.csv` | Metrics across classification thresholds. |
+| `threshold_sensitivity_summary.json`, `threshold_sensitivity_report.md`, `audit.json` | Threshold summary, readable report, and input audit. |
 
-## `metabolome_service/`
+## `tmc_miner/`
 
-| 路径 | 作用 |
+| Path | Purpose |
 |---|---|
-| `README.md` | 模型性质、外部数据、启动、API、验证结果与限制。 |
-| `app.py` | 独立 FastAPI worker；按请求执行 DESeq2 和四类机器学习排序。 |
-| `requirements.txt` | 独立 worker 的最小依赖。 |
-| `data/README.md` | 四个外部组学/注释文件的字段与许可要求。 |
-| `analysis/cross_validate.py` | 留一时期交叉验证和候选基因稳定性分析。 |
-| `results/experiment_metadata.json` | 验证设计、样本配对限制与 DEG 数量。 |
-| `results/summary_by_model.csv` | 四种算法的汇总泛化指标。 |
-| `results/README.md` | 结果文件范围和解释限制。 |
+| `README.md` | Model behavior, external data, startup, API, validation, and limitations. |
+| `app.py` | Standalone worker that performs DESeq2 filtering and machine learning ranking per request. |
+| `requirements.txt` | Minimum worker dependencies. |
+| `data/README.md` | Fields and redistribution notes for external omics files and annotation. |
+| `analysis/cross_validate.py` | Leave-one-stage-out validation and candidate-gene stability analysis. |
+| `results/experiment_metadata.json` | Validation design, sample-pairing limits, and DEG counts. |
+| `results/summary_by_model.csv` | Aggregate generalization metrics for four algorithms. |
+| `results/README.md` | Result-file scope and interpretation limits. |
 
-该服务没有固定预训练权重；树结构和回归系数在请求期间拟合。真实组学数据及大型派生结果不进入 Git。
+TMC-Miner has no fixed pretrained weights. Trees and regression coefficients are fitted during requests. Raw omics data and large derived results are not committed to Git.
 
 ## `salviachat/`
 
-| 路径 | 作用 |
+| Path | Purpose |
 |---|---|
-| `app.py` | 统一 FastAPI 网关，注册所有功能路由并提供健康检查。 |
-| `data/README.md` | 运行时数据目录说明；真实数据不进入 Git。 |
-| `routers/chat.py` | SalviaChat 多智能体问答、流式响应和绘图接口。 |
-| `routers/promoter.py` | ProMoAI 启动子预测和顺式元件标注接口。 |
-| `routers/metabolome.py` | 将请求转发给内部 Metabolome worker。 |
-| `routers/deepppi.py` | 将统一网关请求转发给内部 DeepPPI worker。 |
-| `routers/structure.py` | 蛋白结构预测接口。 |
-| `routers/primer.py` | 引物设计接口。 |
-| `src/core/settings.py` | 配置和环境变量读取。 |
-| `src/core/state.py` | 多智能体会话状态定义。 |
-| `src/core/router.py` | 问题分类和智能体路由。 |
-| `src/core/rag.py` | RAG 检索与问答编排。 |
-| `src/core/generator.py` | 回答生成与图表相关输出。 |
-| `src/core/evaluator.py` | 回答质量评估。 |
-| `src/tools/entity_linker.py` | 生物实体识别、规范化与链接。 |
-| `src/agents/knowledge_agent/component.py` | 知识检索智能体的节点实现。 |
-| `src/agents/knowledge_agent/graph.py` | 知识检索智能体的 LangGraph 流程。 |
-| `src/agents/salvia_agent/component.py` | 丹参数据库查询智能体的节点实现。 |
-| `src/agents/salvia_agent/graph.py` | 丹参数据库查询智能体的 LangGraph 流程。 |
-| `src/agents/tool_agent/component.py` | 生物信息工具智能体的节点实现。 |
-| `src/agents/tool_agent/graph.py` | 生物信息工具智能体的 LangGraph 流程。 |
-| 各级 `__init__.py` | 将对应目录声明为可导入的 Python 包。 |
+| `app.py` | FastAPI gateway, router registration, and health check. |
+| `data/README.md` | Runtime data directory guide; actual data is excluded from Git. |
+| `routers/chat.py` | Multi-agent chat, streaming response, and chart endpoints. |
+| `routers/promoter.py` | HTTP proxy to the ProMoAI worker. |
+| `routers/metabolome.py` | HTTP proxy to the TMC-Miner worker. |
+| `routers/deepppi.py` | HTTP proxy to the DeepPPI worker. |
+| `routers/structure.py` | Protein structure prediction endpoint. |
+| `routers/primer.py` | Primer design endpoint. |
+| `src/core/settings.py` | Configuration and environment-variable loading. |
+| `src/core/state.py` | Multi-agent session state. |
+| `src/core/router.py` | Question classification and agent routing. |
+| `src/core/rag.py` | Retrieval and question-answering orchestration. |
+| `src/core/generator.py` | Answer and chart generation. |
+| `src/core/evaluator.py` | Answer-quality evaluation. |
+| `src/tools/entity_linker.py` | Biological entity recognition, normalization, and linking. |
+| `src/agents/salvia_agent/component.py` | Salvia database agent nodes. |
+| `src/agents/salvia_agent/graph.py` | Salvia database agent LangGraph workflow. |
+| `src/agents/tool_agent/component.py` | Bioinformatics tool agent nodes. |
+| `src/agents/tool_agent/graph.py` | Bioinformatics tool agent LangGraph workflow. |
+| Package `__init__.py` files | Mark directories as importable Python packages. |

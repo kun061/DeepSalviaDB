@@ -11,24 +11,24 @@ from .component import SalviaComponent
 #     metadata: dict
 from ...core.state import AgentState
 def create_salvia_subgraph():
-    """创建鼠尾草数据库查询子图"""
+    """Create the Salvia database query subgraph"""
     
-    # 实例化组件
+    # Instantiate the component.
     salvia_component = SalviaComponent()
     
-    # 创建图
+    # Create the graph.
     workflow = StateGraph(AgentState)
     
-    # 添加节点
-    # 节点1: 生成 SQL
+    # Add nodes.
+    # Node 1: generate SQL.
     workflow.add_node("generate_sql", salvia_component.generate_sql)
-    # 节点2: 执行 SQL
+    # Node 2: execute SQL.
     workflow.add_node("execute_sql", salvia_component.execute_sql)
     
-    # 设置入口点
+    # Set the entry point.
     workflow.set_entry_point("generate_sql")
     
-    # 添加条件边 (生成成功则去执行，失败则结束)
+    # Add a conditional edge: execute generated SQL or end.
     workflow.add_conditional_edges(
         "generate_sql",
         lambda x: x.get("next", END) if "next" in x else END,
@@ -38,7 +38,7 @@ def create_salvia_subgraph():
         }
     )
     
-    # 执行完 SQL 后结束，返回给主 Agent (Router/Generator)
+    # Return to the main agent after executing SQL.
     workflow.add_edge("execute_sql", END)
     
     return workflow.compile()

@@ -18,8 +18,7 @@ export TF_DETERMINISTIC_OPS=1
 export CUBLAS_WORKSPACE_CONFIG=:4096:8
 export TF_CPP_MIN_LOG_LEVEL=2
 case "$PPI_PACKAGE_MODE" in
-  evaluate) exec "$PPI_PACKAGE_PYTHON" -u scripts/reproduce.py "$@" ;;
   train) exec "$PPI_PACKAGE_PYTHON" -u training/train.py --prepared-dir data/D --protocols protein_disjoint --seeds 42 43 44 --epochs 30 --patience 5 --batch-size 128 --bootstrap 1000 --output-dir runs/retrain_D "$@" ;;
   smoke) mkdir -p runs; exec "$PPI_PACKAGE_PYTHON" -u training/train.py --smoke-only --smoke-output runs/gpu_smoke.json "$@" ;;
-  *) printf 'Usage: bash scripts/run.sh {verify|smoke|evaluate|train}\n' >&2; exit 2 ;;
+  *) printf 'Usage: bash scripts/run.sh {verify|smoke|train}\n' >&2; exit 2 ;;
 esac

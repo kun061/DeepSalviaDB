@@ -1,24 +1,24 @@
 # DeepSalviaDB AI Services
 
-本仓库提供四个面向丹参/鼠尾草研究的 AI 推理服务：
+This repository provides four AI services for research on *Salvia* species:
 
-| 服务 | 功能 | REST API |
+| Service | Purpose | REST API |
 |---|---|---|
-| SalviaChat | 多智能体数据库问答与可视化 | `POST /rag/chat` |
-| ProMoAI | 1 kb DNA 启动子预测与顺式元件标注 | `POST /pred/predict` |
-| Metabolome Service | 转录组-代谢组候选基因预测 | `POST /metabolome/predict_multi_gene` |
-| DeepPPI | 蛋白质相互作用概率预测 | `POST /ppi/predict_ppi` |
+| SalviaChat | Multi-agent database question answering and visualization | `POST /rag/chat` |
+| ProMoAI | 1 kb DNA promoter prediction and cis-element annotation | `POST /pred/predict` |
+| TMC-Miner | Candidate gene ranking from transcriptomic and metabolomic data | `POST /metabolome/predict_multi_gene` |
+| DeepPPI | Protein-protein interaction probability prediction | `POST /ppi/predict_ppi` |
 
-FastAPI 网关还提供蛋白结构预测和引物设计接口。交互式接口文档位于 `/docs`。
+The FastAPI gateway also exposes protein structure prediction and primer design endpoints. Interactive API documentation is available at `/docs`.
 
-## 仓库内容
+## Repository contents
 
 ```text
 DeepSalviaDB/
-├── deepppi/             # DeepPPI 推理、训练与复现代码
-├── promoai/             # ProMoAI 模型与实验说明
-├── metabolome_service/  # 独立多组学机器学习 worker 与验证代码
-├── salviachat/          # 统一 FastAPI 网关及 SalviaChat 源码
+├── deepppi/             # DeepPPI inference, training, and frozen data splits
+├── promoai/             # ProMoAI inference, experiments, and results
+├── tmc_miner/           # Standalone TMC-Miner worker and validation
+├── salviachat/          # FastAPI gateway and SalviaChat source code
 ├── docs/
 │   ├── api.md
 │   ├── model_assets.md
@@ -26,26 +26,28 @@ DeepSalviaDB/
 │   └── repository_structure.md
 ├── .env.example
 ├── .gitignore
-├── THIRD_PARTY_NOTICES.md
+├── LICENSE
 └── requirements.txt
 ```
 
-四项 AI 工具现在分别具有独立的产品目录；SalviaChat 通过内部 HTTP 将代谢组请求转发给 Metabolome worker。
+Each tool has its own directory. The gateway forwards DeepPPI, ProMoAI, and TMC-Miner requests to their standalone workers over internal HTTP.
 
-本仓库不包含模型权重、原始组学数据、MySQL 数据库、BLAST/Pfam 数据库、向量数据库或真实密钥。资源清单和放置方式见 [model_assets.md](docs/model_assets.md)。
-完整目录与逐文件用途见 [repository_structure.md](docs/repository_structure.md)。
+The repository includes the frozen DeepPPI train, validation, and test splits. It does not include model weights, the source genome or GFF, raw omics data, MySQL data, BLAST/Pfam databases, vector stores, or credentials. See [model assets](docs/model_assets.md) for external resources and [repository structure](docs/repository_structure.md) for file descriptions.
 
-## 启动服务
+## Licensing and third-party resources
 
-### 1. 获取代码
+[LICENSE](LICENSE) records the provenance and licensing boundaries of third-party data and models. A license for the project's original code and documentation has not yet been selected. See the upstream terms before using or redistributing external resources.
+
+## Start the services
+
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/kun061/DeepSalviaDB.git
 cd DeepSalviaDB
 ```
 
-### 2. 创建 Python 环境
-
+### 2. Create a Python environment
 
 ```bash
 conda create -n deepsalviadb python=3.10 -y
@@ -54,26 +56,24 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
+DeepPPI retraining uses a separate TensorFlow environment defined in `deepppi/environment/environment.yml`. Do not install those locked training dependencies into the shared inference environment.
 
-请勿将 DeepPPI 的 TensorFlow 训练锁定依赖安装到这个推理环境中；重新训练 DeepPPI 应使用独立环境。
+### 3. Download models and prepare data
 
-### 3. 下载模型和准备数据
-
-大型模型权重和数据不在 GitHub 仓库中。安装完根目录依赖后，可使用 Hugging Face CLI 下载已发布模型：
+Large model weights are hosted on Hugging Face. DeepPPI's frozen splits are already in `deepppi/data/D/`. ProMoAI derived sequences are excluded from this public repository pending redistribution review. After installing the root dependencies, download the published models:
 
 ```bash
-hf download wangkun0601/deepppi-d \
-  --local-dir deepppi/weights/D
+hf download wangkun0601/deepppi-d --revision 0216e75f3301cd2df6ec2da1b16f57f6add0fa56 \
+  --local-dir deepppi/weights
 
-hf download wangkun0601/promoai-dss3-bpe \
+hf download wangkun0601/promoai-dss3-bpe --revision f967ef55e489412a0dbc8b911f9378fe4c5d2c6d \
   --local-dir models/promoai-dss3-bpe
 
-hf download wangkun0601/promoai-dss3-6mer \
-  --local-dir models/promoai-dss3-6me
-
+hf download wangkun0601/promoai-dss3-6mer --revision 9a0ffa16e0326b5bc73f9307c2e921ec6df1322d \
+  --local-dir models/promoai-dss3-6mer
 ```
 
-DeepPPI 下载后应存在以下三个文件：
+The DeepPPI download must create these paths:
 
 ```text
 deepppi/weights/D/seed_42/best.weights.h5
@@ -81,53 +81,60 @@ deepppi/weights/D/seed_43/best.weights.h5
 deepppi/weights/D/seed_44/best.weights.h5
 ```
 
-Metabolome Service 还需要转录组、代谢组和注释数据；SalviaChat 完整问答功能还需要 MySQL、Ollama 及相应的科学数据库。资产目录、SHA256 和放置方式见 [model_assets.md](docs/model_assets.md)。
+TMC-Miner also needs transcriptomic, metabolomic, and annotation data. Full SalviaChat question answering needs MySQL, Ollama, and the relevant scientific databases. See [model assets](docs/model_assets.md) for paths and checksums.
 
-### 4. 配置环境变量
+### 4. Configure environment variables
 
 ```bash
 cp .env.example .env
-# 编辑 .env，填写本机的模型、数据和数据库路径
+# Edit local model, data, and database paths.
 nano .env
 ```
 
-至少需要将 `PROMOAI_MODEL_PATH` 改为 ProMoAI 模型的绝对路径，并根据实际部署配置 Metabolome 数据路径、MySQL 连接信息和 Ollama 地址。
+Set `PROMOAI_MODEL_PATH` to the absolute path of the downloaded BPE model directory. Configure TMC-Miner data paths, MySQL credentials, and the Ollama URL for the services you plan to use.
 
-### 5. 启动服务
+### 5. Start the services
 
-以下三个命令需要在三个独立终端中运行。
+Run the following commands in four separate terminals from the repository root.
 
-终端 1：启动独立 DeepPPI worker。
+Terminal 1: DeepPPI worker.
 
 ```bash
-uvicorn app:app --app-dir deepppi \
+python -m uvicorn app:app --app-dir deepppi \
   --host 127.0.0.1 --port 8001 --workers 1
 ```
 
-终端 2：启动独立 Metabolome worker。
+Terminal 2: TMC-Miner worker.
 
 ```bash
-uvicorn app:app --app-dir metabolome_service \
+python -m uvicorn app:app --app-dir tmc_miner \
   --host 127.0.0.1 --port 8002 --workers 1
 ```
 
-终端 3：启动统一网关。ProMoAI 会在该进程中加载，不需要单独启动。
+Terminal 3: ProMoAI worker. The model is loaded at process startup.
 
 ```bash
-uvicorn app:app --app-dir salviachat \
+python -m uvicorn app:app --app-dir promoai \
+  --host 127.0.0.1 --port 8003 --workers 1
+```
+
+Terminal 4: FastAPI gateway.
+
+```bash
+python -m uvicorn app:app --app-dir salviachat \
   --host 0.0.0.0 --port 6006 --workers 1
 ```
 
-
-### 6. 检查服务
+### 6. Check the services
 
 ```bash
 curl http://127.0.0.1:8001/health
 curl http://127.0.0.1:8002/health
+curl http://127.0.0.1:8003/health
 curl http://127.0.0.1:6006/health
 curl http://127.0.0.1:6006/pred/health
 ```
 
-## 引用
+## Citation
 
-Citation Zhang R; Wang K; Zhang SQ; Wei YK; Li WT; Wang B; Yang FR; Zhu TJ et al. DeepSalviaDB: An intelligent agent-empowered multi-omics platform with versatile artificial intelligence toolkits for Salvia species (2026)
+Zhang R, Wang K, Zhang SQ, Wei YK, Li WT, Wang B, Yang FR, Zhu TJ, et al. DeepSalviaDB: An intelligent agent-empowered multi-omics platform with versatile artificial intelligence toolkits for *Salvia* species (2026).

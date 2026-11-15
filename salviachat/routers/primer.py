@@ -2,10 +2,10 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import primer3
 
-# 定义路由
+# Define the router.
 router = APIRouter()
 
-# 定义前端传过来的请求体结构 
+# Define the frontend request body.
 class PrimerDesignRequest(BaseModel):
     seq: str
     lenMin: int = 18
@@ -13,7 +13,7 @@ class PrimerDesignRequest(BaseModel):
     lenMax: int = 22
     prodMin: int = 150
     prodMax: int = 300
-# 定义分析请求的结构体
+# Define the analysis request body.
 class AnalyzeRequest(BaseModel):
     primerF: str = ""
     primerR: str = ""

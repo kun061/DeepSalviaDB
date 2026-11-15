@@ -20,9 +20,9 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from venn import venn  
 plt.rcParams['font.sans-serif'] = ['DejaVu Sans']
-plt.rcParams['axes.unicode_minus'] = False # 顺便解决某些图表负号显示为方块的问题
+plt.rcParams['axes.unicode_minus'] = False # Prevent minus signs from rendering as boxes in charts.
 
-# 配置日志
+# Configure logging.
 logger = logging.getLogger(__name__)
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR.parent / ".env", override=False)
@@ -31,12 +31,16 @@ ANNOTATION_PATH = Path(
     os.getenv("METABOLOME_ANNOTATION_PATH", BASE_DIR / "data" / "dss_final_annotation.csv")
 )
 
-# === 1. 初始化独立 FastAPI worker ===
-app = FastAPI(title="DeepSalviaDB Metabolome Service", version="1.0.0")
+# Initialize the standalone FastAPI worker.
+app = FastAPI(
+    title="TMC-Miner",
+    description="Transcriptome–metabolome candidate-gene mining service",
+    version="1.0.0",
+)
 SUPPORTED_STAGES = ["DAG30", "DAG60", "DAG90", "DAG240", "DAG270", "DAG390"]
 SUPPORTED_MODELS = ["RandomForest", "LASSO", "ElasticNet", "GradientBoosting"]
 
-# === 2. 数据模型定义 (新增 model_type 参数) ===
+# Request models, including the model_type parameter.
 class PredictionRequest(BaseModel):
     metabolite: str
     stage: str
@@ -44,7 +48,7 @@ class PredictionRequest(BaseModel):
     model_types: List[str] = Field(default_factory=lambda: ['RandomForest'])
     top_n: int = 20
 
-# 注释匹配只用于对模型预测结果做独立验证，不参与模型训练或候选基因排序。
+# Annotation matches are for independent validation only; they do not affect training or ranking.
 PATHWAY_ANNOTATION_KEYWORDS = {
     "Tanshinone": [
         "tanshinone", "miltiradiene synthase", "ferruginol synthase",
@@ -61,7 +65,7 @@ PATHWAY_ANNOTATION_KEYWORDS = {
     ]
 }
 
-# === 3. 全局数据加载 ===
+# Load shared data.
 logger.info("Initializing Metabolome AI Model Data...")
 data_load_error = None
 count_df = fpkm_df = metab_df = fpkm_mean = metab_mean = None
@@ -86,10 +90,10 @@ try:
     logger.info("Metabolome AI Model Data Loaded Successfully.")
 except Exception as e:
     data_load_error = str(e)
-    logger.error(f"Failed to load omics data for Metabolome Service: {str(e)}")
+    logger.error(f"Failed to load omics data for TMC-Miner: {str(e)}")
     count_df, fpkm_mean, metab_mean = None, None, None
 
-# 基因功能注释单独加载；注释缺失不应让模型服务整体不可用。
+# Load gene annotations separately so missing annotations do not disable inference.
 annotation_lookup: Dict[str, Dict[str, str]] = {}
 metabolite_pathway_lookup: Dict[str, str] = {}
 annotation_load_error = None
@@ -100,7 +104,7 @@ try:
     if missing_columns:
         raise ValueError(f"dss_final_annotation.csv 缺少字段: {sorted(missing_columns)}")
 
-    # 同一 Local_GeneID 可能有重复注释；合并而不是任意丢弃。
+    # Merge duplicate annotations for a Local_GeneID instead of dropping them.
     for gene_id, group in annotation_df.groupby('Local_GeneID', sort=False):
         descriptions = list(dict.fromkeys(v.strip() for v in group['description'] if v.strip()))
         symbols = list(dict.fromkeys(v.strip() for v in group['Symbol'] if v.strip() and v.strip() != '-'))
@@ -161,25 +165,25 @@ def get_annotation_evidence(gene_id: str, metabolite: str) -> Dict[str, Any]:
 
 def get_all_intersections(sets_dict, include_empty: bool = False):
     """
-    计算 N 个集合之间所有可能的交集区域（唯一元素）
+    Compute all exclusive intersections among N sets
     """
     model_names = list(sets_dict.keys())
     n = len(model_names)
     intersections = {}
     
-    # 遍历从 1 到 2^n - 1 的所有组合
+    # Iterate over all nonempty combinations of n models.
     for i in range(1, 1 << n):
         included_models = [model_names[j] for j in range(n) if (i >> j) & 1]
         excluded_models = [model_names[j] for j in range(n) if not ((i >> j) & 1)]
         
-        # 取包含模型的交集
+        # Intersect the selected model sets.
         res_set = set.intersection(*(set(sets_dict[m]) for m in included_models))
-        # 剔除掉属于排除模型的元素（保证唯一性）
+        # Exclude members of other model sets to make the group exclusive.
         for m in excluded_models:
             res_set -= set(sets_dict[m])
             
         if res_set or include_empty:
-            # Key 用 & 连接，方便前端识别模型组合。
+            # Join model names with '&' for frontend identification.
             key = " & ".join(included_models)
             intersections[key] = sorted(res_set)
             
@@ -188,8 +192,8 @@ def get_all_intersections(sets_dict, include_empty: bool = False):
 
 def generate_venn_svg(venn_data_dict):
     """
-    将模型预测的字典转化为纯正的科研 SVG 韦恩图字符串
-    【究极融合版：完美兼容 3 集合与 4 集合的最佳坐标】
+    Convert model predictions to an SVG Venn diagram.
+    Use coordinates appropriate for three or four sets.
     """
     sets_dict = {k: set(v) for k, v in venn_data_dict.items() if len(v) > 0}
     n = len(sets_dict)
@@ -199,28 +203,28 @@ def generate_venn_svg(venn_data_dict):
         
     fig, ax = plt.subplots(figsize=(8, 8))
     
-    # 使用 Cell/Nature 经典高对比度色卡
+    # Use a high-contrast Cell/Nature-style palette.
     hex_colors = ['#E64B35', '#4DBBD5', '#00A087', '#3C5488', '#F39B7F']
     from matplotlib.colors import ListedColormap
     custom_cmap = ListedColormap(hex_colors[:n])
     
-    # 绘图
+    # Draw the diagram.
     venn(sets_dict, ax=ax, cmap=custom_cmap, fmt="{size}", fontsize=14, legend_loc=None)
     
     model_names = list(sets_dict.keys())
     
-    # 🌟 坐标字典：各取所长，互不干扰
+    # Coordinates for different set counts.
     if n == 2:
         coords = [(0.10, 0.5), (0.90, 0.5)]
         aligns_h = ['right', 'left']
         aligns_v = ['center', 'center']
     elif n == 3:
-        # 🌟 恢复到上个版本的完美 3 集合坐标 (最下方的名字死死贴在底边外部)
+        # Three-set coordinates place the bottom label outside the diagram.
         coords = [(0.15, 0.85), (0.85, 0.85), (0.50, 0.02)]
         aligns_h = ['right', 'left', 'center']
         aligns_v = ['bottom', 'bottom', 'top']
     elif n == 4:
-        # 🌟 保留这个版本完美的 4 集合“皇冠”坐标
+        # Four-set coordinates use the crown layout.
         coords = [(0.18, 0.68), (0.35, 0.88), (0.65, 0.88), (0.82, 0.68)]
         aligns_h = ['right', 'right', 'left', 'left']
         aligns_v = ['center', 'bottom', 'bottom', 'center']
@@ -248,7 +252,7 @@ def run_ml_pipeline(metabolite: str, target_stage: str, control_stage: str, mode
     if count_df is None:
         raise RuntimeError("底层多组学数据未正确加载。")
 
-    # [1. DESeq2 降维] 保持不变
+    # 1. Filter genes with DESeq2.
     selected_cols = [c for c in count_df.columns if target_stage in c or control_stage in c]
     count_matrix = count_df[selected_cols].T.round().astype(int) 
     metadata = pd.DataFrame(
@@ -283,7 +287,7 @@ def run_ml_pipeline(metabolite: str, target_stage: str, control_stage: str, mode
     
     model_gene_scores = []
     
-    # [2. 运行机器学习模型] 保持不变
+    # 2. Fit the selected machine learning models.
     for m_type in model_types:
         if m_type == 'LASSO':
             scaler = StandardScaler()
@@ -316,8 +320,8 @@ def run_ml_pipeline(metabolite: str, target_stage: str, control_stage: str, mode
                 
         model_gene_scores.append(gene_dict)
 
-    # 3. 【核心修正】：严格让韦恩图和数据池尊重 Top N
-    base_sets = {}  # 🌟 给 venn 库画图用（只有选中的 2-4 个模型，如 'RF', 'LASSO'）
+    # 3. Apply Top N consistently to the diagram and candidate pool.
+    base_sets = {}  # Pass only the two to four selected model sets to the Venn library.
     union_top_genes = set() 
     gene_sources = {}
     
@@ -331,10 +335,10 @@ def run_ml_pipeline(metabolite: str, target_stage: str, control_stage: str, mode
             if gene not in gene_sources: gene_sources[gene] = []
             gene_sources[gene].append(m_type)
 
-    # 计算 15 种交集用于前端交互
+    # Compute exclusive intersections for frontend interaction.
     interactive_data = get_all_intersections(base_sets)
 
-    # 4. 组装最终结果
+    # 4. Assemble the final response.
     final_results = []
     all_stages = SUPPORTED_STAGES
     
@@ -362,7 +366,7 @@ def run_ml_pipeline(metabolite: str, target_stage: str, control_stage: str, mode
         result_row.update(get_annotation_evidence(gene, metabolite))
         final_results.append(result_row)
 
-    # 注释命中优先显示；其后仍按模型共识数和预测影响分数排序。
+    # Show annotation matches first, then rank by model consensus and predicted effect.
     final_df = pd.DataFrame(final_results).sort_values(
         by=['Annotation_Supported', 'Hit_Count', 'Impact_Score'],
         ascending=[False, False, False]
@@ -370,7 +374,7 @@ def run_ml_pipeline(metabolite: str, target_stage: str, control_stage: str, mode
     table_records = final_df.to_dict(orient="records")
     records_by_gene = {row['Geneid']: row for row in table_records}
 
-    # 覆盖全部 2^N-1 个独占模型组合，包括当前没有候选基因的组合。
+    # Include all exclusive model combinations, even empty ones.
     all_combination_regions = get_all_intersections(base_sets, include_empty=True)
     hits_by_combination = {}
     for combination, genes in all_combination_regions.items():
@@ -389,8 +393,8 @@ def run_ml_pipeline(metabolite: str, target_stage: str, control_stage: str, mode
 
     validated_records = [row for row in table_records if row['Annotation_Supported']]
 
-    # 再检查每个模型的完整非零重要性排名。这样即使已知相关基因落在 Top N
-    # 之外，也能报告其真实模型排名，而不把它强行塞回 Top N 或改动训练结果。
+    # Check each model's complete nonzero feature-importance ranking, including genes outside Top N.
+    # Report the actual rank without inserting genes into Top N or changing fitted results.
     full_rankings = {}
     for idx, model_name in enumerate(model_types):
         full_rankings[model_name] = sorted(
@@ -442,7 +446,7 @@ def run_ml_pipeline(metabolite: str, target_stage: str, control_stage: str, mode
         )
     )
 
-    # 严格验证原始 Top-N；不补入、不替换、不重排任何模型候选基因。
+    # Validate the original Top N without inserting, replacing, or reordering candidates.
     best_hit = validated_records[0] if validated_records else None
     annotation_validation = {
         'found': best_hit is not None,
@@ -494,7 +498,7 @@ def metadata():
     }
 
 
-# === 2. 修改 API 接口 (传入 req.top_n) ===
+# API endpoint using req.top_n.
 @app.post("/predict_multi_gene")
 def predict_metabolome_genes(req: PredictionRequest):
     if metab_mean is None:
@@ -515,11 +519,11 @@ def predict_metabolome_genes(req: PredictionRequest):
         
     try:
         model_tuple = tuple(req.model_types)
-        # 获取计算结果
+        # Compute results.
         results = run_ml_pipeline(req.metabolite, req.stage, req.control_stage, model_tuple, req.top_n)
         
         svg_content = ""
-        # 🌟 修复点：这里只传 base_sets (只有2~4个Key) 进去画图，再也不会报错了！
+        # Draw using only the selected two to four base_sets.
         if len(req.model_types) > 1 and results.get("base_sets"):
             svg_content = generate_venn_svg(results["base_sets"])
         
@@ -527,7 +531,7 @@ def predict_metabolome_genes(req: PredictionRequest):
             "status": "success",
             "models_used": req.model_types,
             "data": results.get("table_data", []), 
-            "venn_data": results.get("interactive_data", {}), # 依然把裂变后的15个组合传给前端
+            "venn_data": results.get("interactive_data", {}), # Return all exclusive combinations to the frontend.
             "venn_svg": svg_content,
             "annotation_validation": results.get("annotation_validation", {})
         }

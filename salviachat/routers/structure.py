@@ -21,7 +21,7 @@ async def predict_structure(req: SequenceRequest):
             url, 
             data=sequence, 
             headers={"Content-Type": "text/plain"},
-            timeout=60 # ESM 计算可能需要几十秒
+            timeout=60 # ESM computation can take tens of seconds.
         )
         
         if response.status_code == 200:

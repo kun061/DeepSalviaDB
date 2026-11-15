@@ -304,8 +304,8 @@ class SalviaComponent:
 
     def _get_table_schema(self):
         """
-        定义数据库表结构，作为 Prompt 传给大模型。
-        请根据你实际的数据库表修改这里。
+        Define the database schema passed to the model.
+        Update this for the actual database.
         """
         return """
         == DATABASE NAMING CONVENTION ==
@@ -508,22 +508,22 @@ class SalviaComponent:
         
 
     def generate_sql(self, state: Dict[str, Any]) -> Dict[str, Any]:
-        """Step 1: 理解用户问题，生成 SQL"""
+        """Step 1: understand the question and generate SQL"""
         metadata = state.get("metadata", {})
         messages = state["messages"]
         
-        # 获取用户问题
+        # Read the user's question.
         user_question = [msg for msg in messages if isinstance(msg, HumanMessage)]
         
         if not user_question:
             return {"status": "error", "error": "No user question found"}
             
         original_question = user_question[-1].content
-        # 把 Router 查出来的官方 ID 合并给大模型看
+        # Include the official IDs resolved by the router in the model context.
         resolved_messages = [msg for msg in messages if isinstance(msg, SystemMessage) and msg.additional_kwargs.get("type") == "entity_linking_resolved"]
         
         if resolved_messages:
-            # 如果有图谱消歧的结果，强行拼接到大模型要看的问题里
+            # Add graph-based disambiguation to the model context when available.
             linker_hint = resolved_messages[-1].content
             original_question = f"{original_question}\n\n{linker_hint}"
             logger.info("Injected resolved ID into Coder prompt.")
@@ -544,7 +544,7 @@ class SalviaComponent:
         if correction_feedback:
             logger.info(f"Applying evaluator correction feedback: {correction_feedback}")
 
-        # 构建 Prompt
+        # Build the prompt.
         system_prompt = f"""
 You are an expert Data Engineer for a Salvia Multi-Omics Database.
 Your task is to translate natural language questions into MySQL queries.
@@ -914,7 +914,7 @@ Return only valid JSON. Every statement must be a read-only SELECT.
                         additional_kwargs={"type": "salvia_sql_progress", "sql": sql_query}
                     )
                 ],
-                "next": "execute_sql", # 指向下一个节点
+                "next": "execute_sql", # Continue to the next node.
                 "metadata": {**metadata, "current_sql": sql_query}
             }
 
@@ -926,7 +926,7 @@ Return only valid JSON. Every statement must be a read-only SELECT.
             }
 
     def execute_sql(self, state: Dict[str, Any]) -> Dict[str, Any]:
-        """Step 2: 执行 SQL 并返回结果"""
+        """Step 2: execute SQL and return results"""
         metadata = state.get("metadata", {})
         messages = state["messages"]
         sql_query = metadata.get("current_sql")
@@ -938,7 +938,7 @@ Return only valid JSON. Every statement must be a read-only SELECT.
             sql_queries = sql_query if isinstance(sql_query, list) else [sql_query]
             sql_text = "\n".join(sql_queries)
             conn = mysql.connector.connect(**self.db_config)
-            cursor = conn.cursor(dictionary=True) # 让结果以字典形式返回 {col: val}
+            cursor = conn.cursor(dictionary=True) # Return rows as {column: value} dictionaries.
             result_batches = []
             executed_queries = []
             try:
@@ -1000,7 +1000,7 @@ Return only valid JSON. Every statement must be a read-only SELECT.
                         "chromosome": sorted_results[0].get('chromosome'),
                         "stitched_sequence_length": len(full_sequence),
                         "stitched_sequence_preview": full_sequence[:50] + "..." + full_sequence[-50:] if len(full_sequence) > 100 else full_sequence,
-                        "full_sequence_raw": full_sequence # 这个字段留给 Generator 决定是否展示
+                        "full_sequence_raw": full_sequence # Let the generator decide whether to display this field.
                     }]
                     
                     results = summary_result
@@ -1028,7 +1028,7 @@ Return only valid JSON. Every statement must be a read-only SELECT.
                         new_row[new_key] = v
                     formatted_results.append(new_row)
                 
-                # 覆盖原来的 results
+                # Replace the previous results.
                 results = formatted_results
                 logger.info("Injected phenotype units into results.")
 
@@ -1128,7 +1128,7 @@ Return only valid JSON. Every statement must be a read-only SELECT.
                     **metadata, 
                     "thinking_content": f"Database query executed successfully. Found {len(results)} records."
                 },
-                "extracted_data": results  # <--- 画图引擎 (Generator) 将使用这个未被截断的完整列表！
+                "extracted_data": results  # The generator uses this full, untruncated list for plotting.
             }
             
         except Exception as e:

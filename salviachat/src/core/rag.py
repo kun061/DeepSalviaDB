@@ -10,8 +10,8 @@ from ..agents.tool_agent.graph import create_tool_subgraph
 
 def suggest_node(state: AgentState):
     """
-    当数据库明确查不到数据时，路由会流转到这里。
-    你可以在这里用 LLM 动态生成推荐，或者先简单返回一段写死的兜底话术。
+    This node handles requests for which the database has no matching data.
+    It may generate a suggestion with an LLM or return a fixed fallback response.
     """
     suggestion_text = "非常抱歉，目前的数据库中未能检索到该确切数据。建议您检查输入的基因ID或物种名称是否正确，或者尝试查询其他相关途径。"
     return {

@@ -4,13 +4,13 @@ import json
 import re
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import StreamingResponse # 导入流式响应
+from fastapi.responses import StreamingResponse # Import the streaming response.
 from pydantic import BaseModel
 from langchain_core.messages import HumanMessage
 from src.core.settings import configure_settings
 from src.core.rag import initialize_rag_system
 logger = logging.getLogger(__name__)
-# --- 数据模型定义 (保持原样) ---
+# Request and response models.
 class QueryRequest(BaseModel):
     question: str
 class TableColumn(BaseModel):
@@ -64,7 +64,7 @@ async def chat_endpoint(request: Request, body: QueryRequest):
                 
                 if await req.is_disconnected():
                     logger.info(f"前端主动断开连接，立即终止大模型推理。问题: {body.question}")
-                    break  # 直接跳出循环，终止 LangGraph 运行
+                    break  # Exit the loop to stop the LangGraph run.
                 
                 if node_name == "Generator" or "generat" in node_name.lower() or node_name == "rag_node":
                     
