@@ -62,13 +62,13 @@ DeepPPI retraining uses a separate TensorFlow environment defined in `deepppi/en
 Large model weights are hosted on Hugging Face. DeepPPI's frozen splits are already in `deepppi/data/D/`. ProMoAI derived sequences are excluded from this public repository pending redistribution review. After installing the root dependencies, download the published models:
 
 ```bash
-hf download wangkun0601/deepppi-d --revision 0216e75f3301cd2df6ec2da1b16f57f6add0fa56 \
+hf download wangkun0601/deepppi-d \
   --local-dir deepppi/weights
 
-hf download wangkun0601/promoai-dss3-bpe --revision f967ef55e489412a0dbc8b911f9378fe4c5d2c6d \
+hf download wangkun0601/promoai-dss3-bpe \
   --local-dir models/promoai-dss3-bpe
 
-hf download wangkun0601/promoai-dss3-6mer --revision 9a0ffa16e0326b5bc73f9307c2e921ec6df1322d \
+hf download wangkun0601/promoai-dss3-6mer \
   --local-dir models/promoai-dss3-6mer
 ```
 
