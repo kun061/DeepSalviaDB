@@ -16,7 +16,6 @@
 |---|---|
 | `api.md` | REST endpoints, request examples, and response formats. |
 | `model_assets.md` | Model repositories, checksums, external data paths, and release notes. |
-| `release_checklist.md` | Checks required before labeling a release as final. |
 | `repository_structure.md` | This file guide. |
 
 ## `deepppi/`
@@ -25,7 +24,6 @@
 |---|---|
 | `README.md` | DeepPPI-D data, training, and inference instructions. |
 | `app.py` | Standalone FastAPI worker that loads three seed models and predicts PPI probabilities. |
-| `data_scope.json` | Scope of published train/validation/test data and external resources. |
 | `data/D/` | Frozen protein sequences, data splits, partitions, and manifest. |
 | `environment/environment.yml` | Separate Conda training environment for TensorFlow. |
 | `environment/requirements.lock.txt` | Locked pip package versions for training. |

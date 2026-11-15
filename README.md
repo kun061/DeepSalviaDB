@@ -22,7 +22,6 @@ DeepSalviaDB/
 ├── docs/
 │   ├── api.md
 │   ├── model_assets.md
-│   ├── release_checklist.md
 │   └── repository_structure.md
 ├── .env.example
 ├── .gitignore
