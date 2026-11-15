@@ -8,11 +8,10 @@ The worker requires these three data files:
 | `pred_gene/result_fpkm_updated.txt` | `Geneid` and expression replicates for DAG30, DAG60, DAG90, DAG240, DAG270, and DAG390. |
 | `pred_gene/pathway_metabolites_intensity.csv` | `Name`, `Pathway`, and metabolite-intensity replicates for six stages. |
 
-A separate annotation CSV is also needed. Prefer external, access-controlled paths:
+Prefer an external, access-controlled data directory:
 
 ```dotenv
 METABOLOME_DATA_DIR=/absolute/path/to/pred_gene
-METABOLOME_ANNOTATION_PATH=/absolute/path/to/dss_final_annotation.csv
 ```
 
 Check the original provider's terms before redistributing these files.

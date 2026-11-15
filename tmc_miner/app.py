@@ -27,9 +27,8 @@ logger = logging.getLogger(__name__)
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR.parent / ".env", override=False)
 DATA_DIR = Path(os.getenv("METABOLOME_DATA_DIR", BASE_DIR / "data" / "pred_gene"))
-ANNOTATION_PATH = Path(
-    os.getenv("METABOLOME_ANNOTATION_PATH", BASE_DIR / "data" / "dss_final_annotation.csv")
-)
+annotation_path = os.getenv("METABOLOME_ANNOTATION_PATH", "").strip()
+ANNOTATION_PATH = Path(annotation_path).expanduser() if annotation_path else None
 
 # Initialize the standalone FastAPI worker.
 app = FastAPI(
@@ -93,31 +92,32 @@ except Exception as e:
     logger.error(f"Failed to load omics data for TMC-Miner: {str(e)}")
     count_df, fpkm_mean, metab_mean = None, None, None
 
-# Load gene annotations separately so missing annotations do not disable inference.
+# Optional annotation enrichment; omics-based ranking does not require it.
 annotation_lookup: Dict[str, Dict[str, str]] = {}
 metabolite_pathway_lookup: Dict[str, str] = {}
 annotation_load_error = None
-try:
-    annotation_df = pd.read_csv(ANNOTATION_PATH, dtype=str).fillna('')
-    required_columns = {'Local_GeneID', 'Symbol', 'description', 'Aliases'}
-    missing_columns = required_columns - set(annotation_df.columns)
-    if missing_columns:
-        raise ValueError(f"dss_final_annotation.csv 缺少字段: {sorted(missing_columns)}")
+if ANNOTATION_PATH is not None:
+    try:
+        annotation_df = pd.read_csv(ANNOTATION_PATH, dtype=str).fillna('')
+        required_columns = {'Local_GeneID', 'Symbol', 'description', 'Aliases'}
+        missing_columns = required_columns - set(annotation_df.columns)
+        if missing_columns:
+            raise ValueError(f"Annotation CSV is missing columns: {sorted(missing_columns)}")
 
-    # Merge duplicate annotations for a Local_GeneID instead of dropping them.
-    for gene_id, group in annotation_df.groupby('Local_GeneID', sort=False):
-        descriptions = list(dict.fromkeys(v.strip() for v in group['description'] if v.strip()))
-        symbols = list(dict.fromkeys(v.strip() for v in group['Symbol'] if v.strip() and v.strip() != '-'))
-        aliases = list(dict.fromkeys(v.strip() for v in group['Aliases'] if v.strip() and v.strip() != '-'))
-        annotation_lookup[str(gene_id).strip()] = {
-            'Symbol': '; '.join(symbols),
-            'Description': '; '.join(descriptions),
-            'Aliases': '; '.join(aliases)
-        }
-    logger.info(f"Loaded functional annotations for {len(annotation_lookup)} genes.")
-except Exception as e:
-    annotation_load_error = str(e)
-    logger.warning(f"Functional annotation validation is unavailable: {e}")
+        # Merge duplicate annotations for a Local_GeneID instead of dropping them.
+        for gene_id, group in annotation_df.groupby('Local_GeneID', sort=False):
+            descriptions = list(dict.fromkeys(v.strip() for v in group['description'] if v.strip()))
+            symbols = list(dict.fromkeys(v.strip() for v in group['Symbol'] if v.strip() and v.strip() != '-'))
+            aliases = list(dict.fromkeys(v.strip() for v in group['Aliases'] if v.strip() and v.strip() != '-'))
+            annotation_lookup[str(gene_id).strip()] = {
+                'Symbol': '; '.join(symbols),
+                'Description': '; '.join(descriptions),
+                'Aliases': '; '.join(aliases)
+            }
+        logger.info(f"Loaded functional annotations for {len(annotation_lookup)} genes.")
+    except Exception as e:
+        annotation_load_error = str(e)
+        logger.warning(f"Functional annotation validation is unavailable: {e}")
 
 if metab_df is not None and {'Name', 'Pathway'}.issubset(metab_df.columns):
     metabolite_pathway_lookup = (
@@ -448,6 +448,16 @@ def run_ml_pipeline(metabolite: str, target_stage: str, control_stage: str, mode
 
     # Validate the original Top N without inserting, replacing, or reordering candidates.
     best_hit = validated_records[0] if validated_records else None
+    if ANNOTATION_PATH is None:
+        validation_message = "Annotation enrichment is not configured; omics-based ranking is available."
+    elif validated_records:
+        validation_message = (
+            f"Found {len(validated_records)} annotation-supported candidate gene(s) in the original Top N."
+        )
+    else:
+        validation_message = (
+            "No annotation-supported gene was found in the original Top N; no gene was added or reordered."
+        )
     annotation_validation = {
         'found': best_hit is not None,
         'found_in_displayed_top_n': bool(validated_records),
@@ -460,11 +470,7 @@ def run_ml_pipeline(metabolite: str, target_stage: str, control_stage: str, mode
         'best_hit': best_hit,
         'hits_by_combination': hits_by_combination,
         'ranked_annotation_hits': ranked_annotation_hits,
-        'message': (
-            f"Found {len(validated_records)} annotation-supported candidate gene(s) in the original Top N."
-            if validated_records else
-            "No annotation-supported gene was found in the original Top N; no gene was added or reordered."
-        )
+        'message': validation_message
     }
     return {
         "table_data": table_records,

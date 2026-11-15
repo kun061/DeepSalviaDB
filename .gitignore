@@ -70,7 +70,6 @@ tmc_miner/*.joblib
 # SalviaChat private/large assets
 salviachat/data/*
 !salviachat/data/README.md
-salviachat/dss_final_annotation.csv
 salviachat/omics_ml_predictions_database.json
 salviachat/._____temp/
 salviachat/ngrok

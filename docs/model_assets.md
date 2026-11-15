@@ -54,11 +54,10 @@ tmc_miner/data/pred_gene/
 └── pathway_metabolites_intensity.csv
 ```
 
-It also uses a separate annotation file. External paths can be configured with:
+Configure the external data directory with:
 
 ```dotenv
 METABOLOME_DATA_DIR=/absolute/path/to/pred_gene
-METABOLOME_ANNOTATION_PATH=/absolute/path/to/dss_final_annotation.csv
 ```
 
 ## SalviaChat

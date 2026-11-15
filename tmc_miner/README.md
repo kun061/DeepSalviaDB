@@ -17,11 +17,10 @@ data/pred_gene/
 └── pathway_metabolites_intensity.csv
 ```
 
-It also needs a separate annotation file. Configure external data paths with:
+Configure the three-file data directory with:
 
 ```dotenv
 METABOLOME_DATA_DIR=/absolute/path/to/pred_gene
-METABOLOME_ANNOTATION_PATH=/absolute/path/to/dss_final_annotation.csv
 ```
 
 See `data/README.md` and `../docs/model_assets.md` for fields and licensing notes.
@@ -58,7 +57,7 @@ curl -X POST http://127.0.0.1:8002/predict_multi_gene \
 
 ## Endpoints
 
-- `GET /health`: reports data and annotation readiness.
+- `GET /health`: reports data readiness. Annotation enrichment is optional.
 - `GET /metadata`: lists stages, algorithms, and metabolite names.
 - `POST /predict_multi_gene`: ranks candidate genes and returns tables, intersections, and an SVG Venn diagram.
 

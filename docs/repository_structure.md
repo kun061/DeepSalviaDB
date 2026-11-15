@@ -77,7 +77,7 @@ This repository does not copy the full Plant DNA LLMs upstream source. Obtain au
 | `README.md` | Model behavior, external data, startup, API, validation, and limitations. |
 | `app.py` | Standalone worker that performs DESeq2 filtering and machine learning ranking per request. |
 | `requirements.txt` | Minimum worker dependencies. |
-| `data/README.md` | Fields and redistribution notes for external omics files and annotation. |
+| `data/README.md` | Fields and redistribution notes for the three external omics files. |
 | `analysis/cross_validate.py` | Leave-one-stage-out validation and candidate-gene stability analysis. |
 | `results/experiment_metadata.json` | Validation design, sample-pairing limits, and DEG counts. |
 | `results/summary_by_model.csv` | Aggregate generalization metrics for four algorithms. |

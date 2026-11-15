@@ -80,7 +80,7 @@ deepppi/weights/D/seed_43/best.weights.h5
 deepppi/weights/D/seed_44/best.weights.h5
 ```
 
-TMC-Miner also needs transcriptomic, metabolomic, and annotation data. Full SalviaChat question answering needs MySQL, Ollama, and the relevant scientific databases. See [model assets](docs/model_assets.md) for paths and checksums.
+TMC-Miner also needs transcriptomic and metabolomic data. Full SalviaChat question answering needs MySQL, Ollama, and the relevant scientific databases. See [model assets](docs/model_assets.md) for paths and checksums.
 
 ### 4. Configure environment variables
 
