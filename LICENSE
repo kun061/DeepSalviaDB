@@ -7,6 +7,13 @@ CC BY 4.0 terms. Credit STRING and indicate any changes:
 https://string-db.org/cgi/access?footer_active_subpage=licensing
 Material from other providers remains subject to their original terms.
 
+The bundled ProMoAI train, development, and test CSV files contain sequences
+derived from the DSS3 genome. Their inclusion does not change the terms of
+the source genome or annotation resources. The bundled TMC-Miner count,
+expression, and metabolite-intensity tables likewise remain subject to
+the terms of their original data providers. Credit those providers when
+using the datasets.
+
 ProMoAI uses the Plant DNA LLMs / PDLLM foundation models Plant DNAGPT-BPE
 and Plant DNAGPT-6mer from Zhang Tao Lab. This project trains classification
 heads based on those models. The original PDLLM code and foundation models
@@ -23,6 +30,10 @@ External models and services used by SalviaChat, including Ollama/Qwen and
 BGE, as well as other external data and databases used by this project,
 remain subject to their respective providers' terms. This repository does
 not relicense those resources.
+
+The bundled SalviaBench-Final-150.csv contains benchmark questions and gold
+answers constructed from DeepSalviaDB database queries. Reuse of underlying
+database content remains subject to its original terms.
 
 When publishing results obtained with this project, also cite the original
 resources actually used.

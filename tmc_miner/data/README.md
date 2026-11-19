@@ -1,6 +1,6 @@
 # TMC-Miner data
 
-The worker requires these three data files:
+These three files are bundled with the repository and are read by default:
 
 | File | Required fields and purpose |
 |---|---|
@@ -8,10 +8,10 @@ The worker requires these three data files:
 | `pred_gene/result_fpkm_updated.txt` | `Geneid` and expression replicates for DAG30, DAG60, DAG90, DAG240, DAG270, and DAG390. |
 | `pred_gene/pathway_metabolites_intensity.csv` | `Name`, `Pathway`, and metabolite-intensity replicates for six stages. |
 
-Prefer an external, access-controlled data directory:
+Set an external data directory only if you want to use different tables:
 
 ```dotenv
 METABOLOME_DATA_DIR=/absolute/path/to/pred_gene
 ```
 
-Check the original provider's terms before redistributing these files.
+The SHA256 checksums are recorded in `../../docs/model_assets.md`. Follow the original providers' terms when using or redistributing the data.

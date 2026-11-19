@@ -16,18 +16,21 @@ This directory contains promoter classification experiments based on Plant DNAGP
 | `results/bpe_v4_seed42/`, `results/6mer_v4_seed42/` | Saved configurations and summary metrics, without weights. |
 | `results/baselines/` | Saved RF, SVM, and CNN baseline configurations and metrics. |
 | `results/threshold_sensitivity/`, `results/comparison.csv` | Threshold analyses and model comparisons. |
+| `DSS3/promoter_1kb/chromosome_holdout_v4_gc_matched/` | Frozen 1 kb train, development, and test CSV files used by the classification-head experiments. |
 
-The repository does not contain RF, SVM, or CNN baseline training scripts. Only their saved configurations and summary results are included. The pretrained models and some data required by the experiment scripts must be obtained separately; a Git clone alone cannot reproduce every experiment.
+The repository does not contain RF, SVM, or CNN baseline training scripts. Only their saved configurations and summary results are included. The Plant DNAGPT foundation models must be obtained separately; a Git clone alone cannot reproduce every experiment.
+
+The bundled CSV files contain 37,516 training, 5,448 development, and 3,704 test sequences. Every sequence is 1,000 bp long, and each split is balanced between the two labels. No sequence appears in more than one split. File hashes are listed in `../docs/model_assets.md`. The source genome, GFF, and per-sample chromosome metadata are not included.
 
 ## Train classification heads
 
-The scripts expect foundation models under `Pretrained_Models/` and `train.csv`, `dev.csv`, and `test.csv` under `DSS3/promoter_1kb/chromosome_holdout_v4_gc_matched/`. These models and CSV files are not in the public Git repository. The BPE script accepts custom paths:
+The scripts expect foundation models under `Pretrained_Models/` and use the bundled `train.csv`, `dev.csv`, and `test.csv` under `DSS3/promoter_1kb/chromosome_holdout_v4_gc_matched/`. The BPE script accepts custom paths:
 
 ```bash
 python scripts/train_dss3_bpe_1000bp_head_only.py --help
 ```
 
-The 6-mer script defines its default paths near the top of the file. Both scripts train classification heads only; neither trains the Plant DNAGPT foundation model from scratch.
+The 6-mer script defines its default paths near the top of the file. Both scripts train classification heads only; neither trains the Plant DNAGPT foundation model from scratch. Evaluation works without `test.meta.csv`; generated prediction IDs are positional and chromosome values are blank when that optional metadata file is absent.
 
 ## Inference service
 

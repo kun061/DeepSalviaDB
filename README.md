@@ -16,9 +16,9 @@ The FastAPI gateway also exposes protein structure prediction and primer design 
 ```text
 DeepSalviaDB/
 ├── deepppi/             # DeepPPI inference, training, and frozen data splits
-├── promoai/             # ProMoAI inference, experiments, and results
-├── tmc_miner/           # Standalone TMC-Miner worker and validation
-├── salviachat/          # FastAPI gateway and SalviaChat source code
+├── promoai/             # ProMoAI inference, experiments, and data splits
+├── tmc_miner/           # TMC-Miner worker, omics data, and validation
+├── salviachat/          # FastAPI gateway, SalviaChat, and SalviaBench CSV
 ├── docs/
 │   ├── api.md
 │   ├── model_assets.md
@@ -31,7 +31,7 @@ DeepSalviaDB/
 
 Each tool has its own directory. The gateway forwards DeepPPI, ProMoAI, and TMC-Miner requests to their standalone workers over internal HTTP.
 
-The repository includes the frozen DeepPPI train, validation, and test splits. It does not include model weights, the source genome or GFF, raw omics data, MySQL data, BLAST/Pfam databases, vector stores, or credentials. See [model assets](docs/model_assets.md) for external resources and [repository structure](docs/repository_structure.md) for file descriptions.
+The repository includes frozen DeepPPI and ProMoAI train, validation, and test splits, the three TMC-Miner omics tables, and the 150-question SalviaBench CSV. It does not include model weights, the source genome or GFF, MySQL data, BLAST/Pfam databases, vector stores, or credentials. See [model assets](docs/model_assets.md) for data inventories and external resources, and [repository structure](docs/repository_structure.md) for file descriptions.
 
 ## Licensing and third-party resources
 
@@ -59,7 +59,7 @@ DeepPPI retraining uses a separate TensorFlow environment defined in `deepppi/en
 
 ### 3. Download models and prepare data
 
-Large model weights are hosted on Hugging Face. DeepPPI's frozen splits are already in `deepppi/data/D/`. ProMoAI derived sequences are excluded from this public repository pending redistribution review. After installing the root dependencies, download the published models:
+Large model weights are hosted on Hugging Face. The frozen DeepPPI and ProMoAI splits and the TMC-Miner omics tables are included in their respective service directories. After installing the root dependencies, download the published models:
 
 ```bash
 hf download wangkun0601/deepppi-d \
@@ -80,7 +80,7 @@ deepppi/weights/D/seed_43/best.weights.h5
 deepppi/weights/D/seed_44/best.weights.h5
 ```
 
-TMC-Miner also needs transcriptomic and metabolomic data. Full SalviaChat question answering needs MySQL, Ollama, and the relevant scientific databases. See [model assets](docs/model_assets.md) for paths and checksums.
+Full SalviaChat question answering needs MySQL, Ollama, and the relevant scientific databases. See [model assets](docs/model_assets.md) for bundled data paths and checksums.
 
 ### 4. Configure environment variables
 
@@ -90,7 +90,7 @@ cp .env.example .env
 nano .env
 ```
 
-Set `PROMOAI_MODEL_PATH` to the absolute path of the downloaded BPE model directory. Configure TMC-Miner data paths, MySQL credentials, and the Ollama URL for the services you plan to use.
+Set `PROMOAI_MODEL_PATH` to the absolute path of the downloaded BPE model directory. TMC-Miner reads the bundled tables by default; set `METABOLOME_DATA_DIR` only to use a different dataset. Configure MySQL credentials and the Ollama URL for the services you plan to use.
 
 ### 5. Start the services
 

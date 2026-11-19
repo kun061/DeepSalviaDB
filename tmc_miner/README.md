@@ -6,9 +6,9 @@ TMC-Miner is the fourth standalone AI/machine learning tool in DeepSalviaDB. It 
 
 The service does not load fixed pretrained neural-network weights. For each request, it fits a model using the selected metabolite, target stage, control stage, and algorithm. Learned trees or regression coefficients remain in process memory. Repeated requests can use the process cache.
 
-## External data
+## Bundled data
 
-The service needs three files under the data directory:
+The service reads these three bundled files by default:
 
 ```text
 data/pred_gene/
@@ -17,13 +17,15 @@ data/pred_gene/
 └── pathway_metabolites_intensity.csv
 ```
 
-Configure the three-file data directory with:
+To use a different dataset, set:
 
 ```dotenv
 METABOLOME_DATA_DIR=/absolute/path/to/pred_gene
 ```
 
 See `data/README.md` and `../docs/model_assets.md` for fields and licensing notes.
+
+The bundled count and FPKM tables each contain 29,236 gene rows; the metabolite table contains 20 rows. TMC-Miner does not need a separate annotation CSV for its omics-based ranking.
 
 ## Start the worker
 

@@ -55,21 +55,34 @@ deepppi/results/
 deepppi/runs/
 deepppi/verification/
 
-# ProMoAI raw and derived sequence data (redistribution permission pending)
-promoai/DSS3/
+# ProMoAI: publish only the frozen train/dev/test splits
+promoai/DSS3/*
+!promoai/DSS3/promoter_1kb/
+promoai/DSS3/promoter_1kb/*
+!promoai/DSS3/promoter_1kb/chromosome_holdout_v4_gc_matched/
+promoai/DSS3/promoter_1kb/chromosome_holdout_v4_gc_matched/*
+!promoai/DSS3/promoter_1kb/chromosome_holdout_v4_gc_matched/train.csv
+!promoai/DSS3/promoter_1kb/chromosome_holdout_v4_gc_matched/dev.csv
+!promoai/DSS3/promoter_1kb/chromosome_holdout_v4_gc_matched/test.csv
 promoai/finetune/
 promoai/Pretrained_Models/
 
-# TMC-Miner private/derived assets
+# TMC-Miner: publish only the three required omics tables
 tmc_miner/data/*
 !tmc_miner/data/README.md
+!tmc_miner/data/pred_gene/
+tmc_miner/data/pred_gene/*
+!tmc_miner/data/pred_gene/count_updated.txt
+!tmc_miner/data/pred_gene/result_fpkm_updated.txt
+!tmc_miner/data/pred_gene/pathway_metabolites_intensity.csv
 tmc_miner/results/local_cv/
 tmc_miner/artifacts/
 tmc_miner/*.joblib
 
-# SalviaChat private/large assets
+# SalviaChat: publish only the frozen benchmark CSV
 salviachat/data/*
 !salviachat/data/README.md
+!salviachat/data/SalviaBench-Final-150.csv
 salviachat/omics_ml_predictions_database.json
 salviachat/._____temp/
 salviachat/ngrok

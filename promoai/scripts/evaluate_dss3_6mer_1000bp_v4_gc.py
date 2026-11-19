@@ -4,9 +4,15 @@ from sklearn.metrics import accuracy_score,precision_score,recall_score,f1_score
 from transformers import AutoTokenizer,AutoModelForSequenceClassification
 ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__))); DATA=os.path.join(ROOT,'DSS3/promoter_1kb/chromosome_holdout_v4_gc_matched'); OUT=os.path.join(ROOT,'finetune/dss3_6mer_1000bp_head_only_v4_gc_seed42'); CK=os.path.join(OUT,'best_model')
 def kmers(s): return ' '.join(s[i:i+6].upper() for i in range(len(s)-5))
+def load_test_data():
+ d=pd.read_csv(os.path.join(DATA,'test.csv'))
+ meta_path=os.path.join(DATA,'test.meta.csv')
+ m=pd.read_csv(meta_path) if os.path.isfile(meta_path) else pd.DataFrame({'sample_id':np.arange(len(d)),'chromosome':['']*len(d)})
+ assert len(d)==len(m) and d.sequence.map(len).eq(1000).all()
+ return d,m
 def main():
  tok=AutoTokenizer.from_pretrained(CK,model_max_length=1024); model=AutoModelForSequenceClassification.from_pretrained(CK); model.config.pad_token_id=tok.pad_token_id; model.eval(); dev=torch.device('cuda' if torch.cuda.is_available() else 'cpu'); model.to(dev)
- d=pd.read_csv(os.path.join(DATA,'test.csv')); m=pd.read_csv(os.path.join(DATA,'test.meta.csv')); assert len(d)==len(m) and d.sequence.map(len).eq(1000).all()
+ d,m=load_test_data()
  probs=[]
  with torch.inference_mode():
   for i in range(0,len(d),8):

@@ -39,6 +39,7 @@
 |---|---|
 | `README.md` | ProMoAI data construction, training, evaluation, and upstream relationship. |
 | `app.py` | Standalone worker that loads the BPE classifier and serves predictions on port 8003. |
+| `DSS3/promoter_1kb/chromosome_holdout_v4_gc_matched/` | Frozen train, development, and test promoter-sequence CSV files. |
 | `requirements.txt` | Minimum worker dependencies. |
 | `upstream.md` | Plant DNA LLMs provenance and usage boundaries. |
 | `scripts/README.md` | Suggested order for experiment scripts. |
@@ -74,23 +75,25 @@ This repository does not copy the full Plant DNA LLMs upstream source. Obtain au
 
 | Path | Purpose |
 |---|---|
-| `README.md` | Model behavior, external data, startup, API, validation, and limitations. |
+| `README.md` | Model behavior, bundled data, startup, API, validation, and limitations. |
 | `app.py` | Standalone worker that performs DESeq2 filtering and machine learning ranking per request. |
 | `requirements.txt` | Minimum worker dependencies. |
-| `data/README.md` | Fields and redistribution notes for the three external omics files. |
+| `data/README.md` | Fields and redistribution notes for the three bundled omics files. |
+| `data/pred_gene/` | Count, FPKM, and metabolite-intensity tables used by the worker. |
 | `analysis/cross_validate.py` | Leave-one-stage-out validation and candidate-gene stability analysis. |
 | `results/experiment_metadata.json` | Validation design, sample-pairing limits, and DEG counts. |
 | `results/summary_by_model.csv` | Aggregate generalization metrics for four algorithms. |
 | `results/README.md` | Result-file scope and interpretation limits. |
 
-TMC-Miner has no fixed pretrained weights. Trees and regression coefficients are fitted during requests. Raw omics data and large derived results are not committed to Git.
+TMC-Miner has no fixed pretrained weights. Trees and regression coefficients are fitted during requests. The three required omics tables are bundled; other raw data and large derived results are excluded from Git.
 
 ## `salviachat/`
 
 | Path | Purpose |
 |---|---|
 | `app.py` | FastAPI gateway, router registration, and health check. |
-| `data/README.md` | Runtime data directory guide; actual data is excluded from Git. |
+| `data/README.md` | Describes the bundled SalviaBench CSV and external runtime data. |
+| `data/SalviaBench-Final-150.csv` | Frozen 150-question evaluation set with categories, questions, and gold answers. |
 | `routers/chat.py` | Multi-agent chat, streaming response, and chart endpoints. |
 | `routers/promoter.py` | HTTP proxy to the ProMoAI worker. |
 | `routers/metabolome.py` | HTTP proxy to the TMC-Miner worker. |
