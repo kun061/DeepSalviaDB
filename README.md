@@ -31,7 +31,7 @@ DeepSalviaDB/
 
 Each tool has its own directory. The gateway forwards DeepPPI, ProMoAI, and TMC-Miner requests to their standalone workers over internal HTTP.
 
-The repository includes frozen DeepPPI and ProMoAI train, validation, and test splits, the three TMC-Miner omics tables, and the 150-question SalviaBench CSV. It does not include model weights, the source genome or GFF, MySQL data, BLAST/Pfam databases, vector stores, or credentials. See [model assets](docs/model_assets.md) for data inventories and external resources, and [repository structure](docs/repository_structure.md) for file descriptions.
+The repository includes frozen DeepPPI and ProMoAI train, validation, and test splits, the three TMC-Miner omics tables, and the 150-question SalviaBench test set. It does not include model weights, the source genome or GFF, MySQL data, BLAST/Pfam databases, vector stores, or credentials. See [model assets](docs/model_assets.md) for data inventories and external resources, and [repository structure](docs/repository_structure.md) for file descriptions.
 
 ## Licensing and third-party resources
 

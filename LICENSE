@@ -31,7 +31,7 @@ BGE, as well as other external data and databases used by this project,
 remain subject to their respective providers' terms. This repository does
 not relicense those resources.
 
-The bundled SalviaBench-Final-150.csv contains benchmark questions and gold
+The bundled SalviaBench-Final-150.csv contains test questions and gold
 answers constructed from DeepSalviaDB database queries. Reuse of underlying
 database content remains subject to its original terms.
 

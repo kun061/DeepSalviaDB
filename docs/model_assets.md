@@ -8,7 +8,7 @@ The frozen DeepPPI D dataset is included at `deepppi/data/D/`. File counts, labe
 
 ProMoAI's frozen 1 kb train, development, and test splits are included at `promoai/DSS3/promoter_1kb/chromosome_holdout_v4_gc_matched/`. They contain 37,516, 5,448, and 3,704 sequences, respectively. The source genome, GFF, and per-sample chromosome metadata are not included.
 
-TMC-Miner includes the three count, FPKM, and metabolite-intensity tables required by its worker under `tmc_miner/data/pred_gene/`. SalviaChat includes `salviachat/data/SalviaBench-Final-150.csv`, a 150-question benchmark export with gold answers.
+TMC-Miner includes the three count, FPKM, and metabolite-intensity tables required by its worker under `tmc_miner/data/pred_gene/`. SalviaChat includes `salviachat/data/SalviaBench-Final-150.csv`, a 150-question test set with gold answers.
 
 ### Dataset SHA256 checksums
 
@@ -78,4 +78,4 @@ METABOLOME_DATA_DIR=/absolute/path/to/pred_gene
 
 ## SalviaChat
 
-The bundled SalviaBench CSV is evaluation data, not a runtime requirement. Full question answering depends on MySQL, Ollama models, and other scientific data resources. Configure local database credentials and paths in `.env`.
+The bundled SalviaBench CSV is the 150-question test set, not a runtime requirement. Full question answering depends on MySQL, Ollama models, and other scientific data resources. Configure local database credentials and paths in `.env`.

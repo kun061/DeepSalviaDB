@@ -93,7 +93,7 @@ TMC-Miner has no fixed pretrained weights. Trees and regression coefficients are
 |---|---|
 | `app.py` | FastAPI gateway, router registration, and health check. |
 | `data/README.md` | Describes the bundled SalviaBench CSV and external runtime data. |
-| `data/SalviaBench-Final-150.csv` | Frozen 150-question evaluation set with categories, questions, and gold answers. |
+| `data/SalviaBench-Final-150.csv` | Frozen 150-question test set with categories, questions, and gold answers. |
 | `routers/chat.py` | Multi-agent chat, streaming response, and chart endpoints. |
 | `routers/promoter.py` | HTTP proxy to the ProMoAI worker. |
 | `routers/metabolome.py` | HTTP proxy to the TMC-Miner worker. |
